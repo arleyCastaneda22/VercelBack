@@ -3,6 +3,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import EstilistaRouter from'./routes/estilista.routes.js'
 // Database connection
 import('./database/database.js');
 
@@ -12,6 +13,9 @@ const app = express();
 app.use(cors());
 app.use(cookieParser());
 app.use(express.json());
+
+//Rutas
+app.use('/api', EstilistaRouter)
 
 
 
