@@ -16,11 +16,6 @@ app.use(express.json());
 // Routes
 // app.use('/api', routes);
 
-
-// mongoose.connect('mongodb://localhost:27017/BeautySoft')
-//   .then(db => console.log('Database is Connected'))
-//   .catch(err => console.error('Error de conexión a la base de datos:', err));
-
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log("App is listening on port " + PORT);
