@@ -24,7 +24,13 @@ router.post("/register",[
     register
 );
 
-router.post("/login", login);
+router.post("/login",[
+    body('correo_usuario', "el correo debe ser correcto")
+    .trim()
+    .isEmail()
+    .normalizeEmail(),
+    body('contrasena', "minimo 6 caracteres").trim().isLength({min:6}),
+], login);
 
 
 
