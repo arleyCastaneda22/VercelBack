@@ -1,7 +1,7 @@
-const moongoose = require('mongoose')
-const {Schema, model} = require('mongoose');
+import mongoose from 'mongoose';
+import {Schema, model} from 'mongoose';
 
-const userSchema = new moongoose.Schema({
+const userSchema = new Schema({
     // id_usuario: {
     //     type: Number,
     //     required: true,
@@ -9,7 +9,9 @@ const userSchema = new moongoose.Schema({
     correo_usuario: {
         type: String,
         unique:true,
-        required:true
+        required:true,
+        trim:true,
+
     },
     nombre: {
         type: String,
@@ -38,4 +40,5 @@ const userSchema = new moongoose.Schema({
     timestamps:true
 })
 
-module.exports = moongoose.model('User', userSchema);
+// module.exports = moongoose.model('User', userSchema);
+export const User = model('User',userSchema)
