@@ -3,7 +3,6 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import EstilistaRouter from'./routes/estilista.routes.js'
 // Database connection
 import('./database/database.js');
 
@@ -17,7 +16,8 @@ app.use(express.json());
 //Rutas
 app.use('/api', EstilistaRouter)
 
-
+// Routes
+// app.use('/api', routes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
