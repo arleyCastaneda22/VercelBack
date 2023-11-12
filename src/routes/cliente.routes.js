@@ -1,5 +1,5 @@
 import Router from 'express'
-import { createCliente, listarCliente, listarUnCliente, editarCliente, eliminarCliente } from '../controllers/Cliente.controller.js'
+import { createCliente, listarCliente, listarUnCliente, editarCliente, eliminarCliente, actualizarEstado } from '../controllers/Cliente.controller.js'
 
 const router = Router();
 
@@ -10,6 +10,8 @@ router.get('/clientes', listarCliente)
     .post('/clientes', createCliente)
 
     .put('/clientes/:id', editarCliente)
+
+    .get('/clientes/estado/:id', actualizarEstado)
 
     .delete('/clientes/:id', eliminarCliente)
 

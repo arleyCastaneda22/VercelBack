@@ -1,6 +1,5 @@
 import "dotenv/config";
 import express from 'express';
-import mongoose from 'mongoose';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import EstilistaRouter from './routes/estilista.routes.js'
