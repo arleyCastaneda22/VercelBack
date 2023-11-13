@@ -2,11 +2,12 @@ import Router from 'express'
 import express from 'express'
 import { body } from 'express-validator'
 import { login, register } from '../controllers/auth.controller.js';
+import { validationResultExpress } from '../middlewares/validationResultExpress.js';
 
 const router = express.Router();
 
 router.post("/register",[
-    body('correo_usuario', "el correo debe ser correcto")
+    body('email', "el correo debe ser correcto")
     .trim()
     .isEmail()
     .normalizeEmail(),
@@ -21,16 +22,20 @@ router.post("/register",[
         return value;
     }),
     ],
+    validationResultExpress,
     register
-);
+    );
 
 router.post("/login",[
-    body('correo_usuario', "el correo debe ser correcto")
+    body('email', "el correo debe ser correcto")
     .trim()
     .isEmail()
     .normalizeEmail(),
     body('contrasena', "minimo 6 caracteres").trim().isLength({min:6}),
-], login);
+    ],
+    validationResultExpress,
+    login
+    );
 
 
 
