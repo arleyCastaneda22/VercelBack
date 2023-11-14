@@ -26,6 +26,10 @@ app.use('/api', ClienteRouter)
 
 // Routes
 // app.use('/api', routes);
+app.use(cors({
+  origin: 'http://localhost:4200', // Cambia esta URL por la URL de tu aplicación Angular
+  credentials: true
+}));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
