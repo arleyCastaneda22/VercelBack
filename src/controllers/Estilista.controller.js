@@ -19,7 +19,7 @@ export const createEstilista = async(req,res)=>{
 export const listarEstilista= async(req, res)=>{
     try {
         const estilista= await Estilista.find();
-        res.status(200).json(estilista)
+         return res.status(200).json(estilista)
     } catch (error) {
         console.log(error)
         return res.status(500).json({message: error.message})

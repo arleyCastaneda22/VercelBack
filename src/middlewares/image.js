@@ -25,6 +25,6 @@ const fileFilter=(req, file, cb)=> {
     }
 };
 
-export default subirImagen=multer({storage:guardar, fileFilter:fileFilter})
+export const subirImagen=multer({storage:guardar, fileFilter:fileFilter})
 
 
