@@ -12,11 +12,13 @@ const userSchema = new mongoose.Schema({
         unique:true,
         required:true,
         trim:true,
-
     },
     nombre: {
         type: String,
     },
+    // telefono:{
+    //     type:String,
+    // },
     apellido: {
         type: String,
     },
@@ -65,3 +67,5 @@ userSchema.methods.comparePassword = async function(candidatePassword){
 
 // module.exports = moongoose.model('User', userSchema);
 export const User = mongoose.model('User',userSchema)
+
+export default model('User', userSchema)

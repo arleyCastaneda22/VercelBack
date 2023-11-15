@@ -16,7 +16,7 @@ router.post("/register",[
     body('contrasena', "la contraseña debe ser valida")
     .trim()
     .custom((value, {req}) => {
-        if(value !== req.body.repassword){
+        if(value !== req.body.recontrasena){
             throw new Error("no conciden las contraseñas")
         }
         return value;

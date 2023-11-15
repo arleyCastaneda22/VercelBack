@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 import EstilistaRouter from './routes/estilista.routes.js'
 import ClienteRouter from './routes/cliente.routes.js'
 import authRouther from './routes/auth.routes.js'
+import UsuarioRouter from './routes/usuario.routes.js'
 // Database connection
 import('./database/database.js');
 
@@ -24,12 +25,10 @@ app.use('/api', EstilistaRouter)
 
 app.use('/api', ClienteRouter)
 
+app.use('/api', UsuarioRouter )
+
 // Routes
 // app.use('/api', routes);
-app.use(cors({
-  origin: 'http://localhost:4200', // Cambia esta URL por la URL de tu aplicación Angular
-  credentials: true
-}));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
