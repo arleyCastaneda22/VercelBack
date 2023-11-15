@@ -5,7 +5,7 @@ import fs from 'fs';
 //Listar servicio
 export const listarServicio = async (req, res) => {
     try {
-        const servicio = await Servicio.find();
+        const servicio = await Servicio.find().populate('estilista');
         return res.status(200).json(servicio)
     } catch (error) {
         console.log(error)
@@ -13,53 +13,45 @@ export const listarServicio = async (req, res) => {
     }
 }
 
-//Crear servicio
-export const createServicio = async (req, res) => {
+export const listarUnServicio=async(req,res)=>{
     try {
-        const { nombre_servicio, duracion, precio, estilista } = req.body
-        const validacion = validar(req.file, 'Y')
-        if (validacion == '') {
-            const nuevoServicio = new Servicio({
-                nombre_servicio: nombre_servicio, duracion: duracion, precio: precio, estilista: estilista,
-                imagen: '/uploads/' + req.file.filename
-            })
-            return await nuevoServicio.save().then(() => {
-                res.status(201).json({ status: true, data: nuevoServicio })
-            })
-        }
-
-        res.status(201).json({ status: true, data: nuevoServicio })
-
+        const id = req.params.id;
+        const servicio = await Servicio.findById(id).populate('estilista');
+        res.status(200).send(servicio)
     } catch (error) {
         console.log(error)
-        return res.status(500).json({ mesage: error.mesage })
+        return res.status(500).json({message: error.message})
     }
-
-
 }
-//Actualizar servicio
-export const actualizarServicio = async (req, res) => {
-    try {
-        const { id } = req.params
-        const { nombre_servicio, duracion, precio, estilista } = req.body
-        let imagen = ''
-        let valores = { nombre_servicio: nombre_servicio, duracion: duracion, 
-            precio: precio, estilista: estilista }
-        if (req.file != null) {
-            imagen = '/uploads/' + req.file.filename
-            valores = { nombre_servicio: nombre_servicio, duracion: duracion, 
-                precio: precio, estilista: estilista, imagen: imagen }
-            await eliminarImagen(id);
-        }
-        await Servicio.updateOne({ _id: id }, { $set: valores })
-        return res.status(204).json({ status: true, data: Servicio })
 
+//Crear servicio
+export const createServicio = async(req,res)=>{
+    try {
+   
+        const servicio= Servicio(req.body)     
+        const servicioSave= await servicio.save()
+        return res.status(201).json(servicioSave)
+        
     } catch (error) {
         console.log(error)
-        return res.status(500).json({ mesage: error.mesage })
+         return res.status(500).json({mesage:error.mesage})
+        
     }
+}
 
 
+
+//Actualizar servicio
+export const editarServicio=async(req,res)=>{
+    try {
+        const id=req.params.id;
+        const actualizadoServicio= await Servicio.findByIdAndUpdate(id, req.body);
+        res.status(204).json(actualizadoServicio);
+        
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({message: error.message})
+    }
 }
 //Eliminar servicio
 export const eliminarServicio = async (req, res) => {
@@ -79,23 +71,5 @@ export const eliminarServicio = async (req, res) => {
     }
 }
 
-//Me permite eliminar la imagen en la ubicacion
-const eliminarImagen = async (id) => {
-    const servicio = await Servicio.findById(id);
-    const img = servicio.imagen
-    fs.unlinkSync('./public' + img)
-}
 
-//Validación para la imagen
-const validar = (sevalida, img) => {
-    var errors = []
-    if (sevalida === 'Y' && img === undefined) {
-        errors.push('Seleccione una imagen en formato jpg o png ')
-    } else {
-        if (errors != '') {
-            fs.unlinkSync('./public/uploads/' + img.filename)
-        }
-    }
-    return errors
-}
 

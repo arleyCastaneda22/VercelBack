@@ -1,16 +1,21 @@
 import { Schema, model } from "mongoose";
 
 const servicioSchema=new Schema({
-    imagen:{
-        type:String
-    },
     nombre_servicio:{
         type:String,
         require:true
     },
     duracion:{
-        type:Date,
-        require:true
+        type:String,
+        require:true,
+        validate: {
+            validator: function (value) {
+              // Validar que la cadena tenga el formato HH:MM
+              const regex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+              return regex.test(value);
+            },
+            message: 'Formato de hora no válido. Debe ser HH:MM.',
+          },
     },
     precio:{
         type:Number,
@@ -20,9 +25,10 @@ const servicioSchema=new Schema({
         type:Boolean,
         default:true
     },
-    estilista:{
-        type:String,
-        require:true
+    estilista: {
+        type: Schema.Types.ObjectId,  // Tipo de referencia ObjectId
+        ref: 'Estilista',  // Nombre del modelo a referenciar
+        required: true
     }
 },{
     timestamps:true,

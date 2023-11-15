@@ -1,13 +1,15 @@
 import Router from 'express'
-import { createServicio, listarServicio, actualizarServicio, eliminarServicio } from '../controllers/Servicio.controller.js'
-import { subirImagen } from '../middlewares/image.js'
+import { createServicio, listarServicio, editarServicio, eliminarServicio, listarUnServicio } from '../controllers/Servicio.controller.js'
+
 const router = Router()
 
 router.get('/servicios', listarServicio)
 
-    .post('/servicios', subirImagen.single('imagen'), createServicio)
+    .get('/servicios/:id',listarUnServicio )
 
-    .put('/servicios/:id', subirImagen.single('imagen'),actualizarServicio )
+    .post('/servicios', createServicio)
+
+    .put('/servicios/:id', editarServicio )
     
     .delete('/servicios/:id', eliminarServicio )
 

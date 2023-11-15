@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import EstilistaRouter from './routes/estilista.routes.js'
 import ClienteRouter from './routes/cliente.routes.js'
 import authRouther from './routes/auth.routes.js'
+import ServicioRouter from'./routes/servicio.routes.js'
 // Database connection
 import('./database/database.js');
 
