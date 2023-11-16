@@ -57,3 +57,22 @@ export const eliminarCliente=async(req,res)=>{
         return res.status(500).json({message: error.message})
     }
 }
+
+export const actualizarEstado = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { estado } = req.body;
+
+        // Actualiza el estado en la base de datos
+        const clienteActualizado = await Cliente.findByIdAndUpdate(
+            id,
+            { estado },
+            { new: true } // Para obtener el cliente actualizado
+        );
+
+        res.status(200).json({ estado: clienteActualizado.estado });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error.message });
+    }
+};

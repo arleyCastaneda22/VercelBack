@@ -1,5 +1,5 @@
 import Router from 'express'
-import { createCliente, listarCliente, listarUnCliente, editarCliente, eliminarCliente } from '../controllers/Cliente.controller.js'
+import { createCliente, listarCliente, listarUnCliente, editarCliente, eliminarCliente, actualizarEstado  } from '../controllers/Cliente.controller.js'
 
 const router = Router();
 
@@ -12,5 +12,7 @@ router.get('/clientes', listarCliente)
     .put('/clientes/:id', editarCliente)
 
     .delete('/clientes/:id', eliminarCliente)
+
+    .put('/clientes/:id/estado', actualizarEstado);
 
 export default router;
