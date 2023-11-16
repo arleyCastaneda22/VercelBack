@@ -1,11 +1,13 @@
 import Router from 'express'
-import { createServicio, listarServicio, editarServicio, eliminarServicio, listarUnServicio } from '../controllers/Servicio.controller.js'
+import { createServicio, listarServicio, editarServicio, eliminarServicio, listarUnServicio, actualizarEstado} from '../controllers/Servicio.controller.js'
 
 const router = Router()
 
 router.get('/servicios', listarServicio)
 
     .get('/servicios/:id',listarUnServicio )
+
+    .get('/servicios/estado/:id', actualizarEstado)
 
     .post('/servicios', createServicio)
 
