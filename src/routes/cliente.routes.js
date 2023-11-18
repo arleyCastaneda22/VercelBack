@@ -1,9 +1,5 @@
 import Router from 'express'
-<<<<<<< HEAD
-import { createCliente, listarCliente, listarUnCliente, editarCliente, eliminarCliente, actualizarEstado } from '../controllers/Cliente.controller.js'
-=======
 import { createCliente, listarCliente, listarUnCliente, editarCliente, eliminarCliente, actualizarEstado  } from '../controllers/Cliente.controller.js'
->>>>>>> bb18a8a9d71e89f278643f5b9ef62ccdf41fae56
 
 const router = Router();
 
