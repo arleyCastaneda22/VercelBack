@@ -21,8 +21,9 @@ export const register = async(req,res) =>{
         
 
         //jwt
+        const token = jwt.sign({_id: user._id}, 'secretKey')
 
-        return res.status(201).json({ok: true})
+        res.status(201).json({token})
     } catch (error) {
         console.log(error.menssage);
         // alternatica por defecto, por codigos de error de mongoose
@@ -32,7 +33,7 @@ export const register = async(req,res) =>{
         //respuesta por defecto
         return res.status(500).json({error: "Error de servidor"})
     }
-    res.json({ok:"regiser works"})
+
 }
 
 
@@ -55,12 +56,7 @@ export const login = async (req,res) =>{
                                                 //esto lo debemos cambiar
         const token = jwt.sign({uid: user._id}, "process.env.JWT_SECRET")
 
-        return  res.json({token})
 
-        res.cookie("jwt", token,{
-            httpOnly:true,
-            maxAge:24*60*60*1000
-        })
         
     } catch (error) {
         console.log(error)
