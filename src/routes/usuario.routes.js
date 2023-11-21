@@ -1,12 +1,13 @@
 import Router from 'express'
 
 import {listarUsuarios,listarUnUsuario,editarUsuario,eliminarUsuario} from '../controllers/Usuario.controller.js'
-import {register} from '../controllers/auth.controller.js'
+import {register, verifyToken} from '../controllers/auth.controller.js'
+
 
 
 const router = Router();
 
-router.get('/usuarios', listarUsuarios)
+router.get('/usuarios', verifyToken, listarUsuarios)
 
     .get('/usuarios/:id', listarUnUsuario)
 

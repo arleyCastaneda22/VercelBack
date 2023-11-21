@@ -11,19 +11,23 @@ export const register = async(req,res) =>{
 
     const {email,nombre,apellido,contrasena} = req.body
     try {
+        //verifica si el usuario existe
         let user = await User.findOne({email});
 
-        if(user) throw { code: 11000};
+        if(user) 
+        throw { code: 11000};
 
-
+        //si no crea un nuevo usuario(objeto)
         user = new User({email,nombre,apellido,contrasena});
         await user.save()
         
 
-        //jwt
+        //genera el token jwt
         const token = jwt.sign({_id: user._id}, 'secretKey')
 
         res.status(201).json({token})
+
+        //maneja los errores
     } catch (error) {
         console.log(error.menssage);
         // alternatica por defecto, por codigos de error de mongoose
@@ -53,8 +57,10 @@ export const login = async (req,res) =>{
             return res.status(403).json({ error:'Contraseña incorrecta'});
         
         //generar el token
-                                                //esto lo debemos cambiar
-        const token = jwt.sign({uid: user._id}, "process.env.JWT_SECRET")
+                                                
+        const token = jwt.sign({_id: user._id}, "secretKey")
+
+        return res.status(200).json({token})
 
 
         
@@ -65,3 +71,19 @@ export const login = async (req,res) =>{
     }
     return res.json({ok:"login works"})
 };
+
+export function verifyToken(req,res,next){
+    if(!req.headers.authorization){
+        return res.status(401).send('unAuthorize request')
+    }
+    const token = req.headers.authorization.split(' ')[1]
+
+    if(token == 'null'){
+        return res.status(401).send('unAuthorize request')
+    }
+
+    const payload = jwt.verify(token,'secretKey')
+    
+    req.userId = payload._id;
+    next();
+}
