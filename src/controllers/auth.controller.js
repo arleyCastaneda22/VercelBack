@@ -65,7 +65,7 @@ export const login = async (req,res) =>{
 
         
     } catch (error) {
-        console.log(error)
+        console.log(error.message)
         return res.status(500).json({error: "Error de servidor"})
 
     }
@@ -82,7 +82,7 @@ export function verifyToken(req,res,next){
         return res.status(401).send('unAuthorize request')
     }
 
-    const payload = jwt.verify(token,'secretKey')
+    const payload = jwt.verify(token,'secretKey');
     
     req.userId = payload._id;
     next();
