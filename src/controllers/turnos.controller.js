@@ -1,19 +1,11 @@
 import Turno from '../models/Turnos.js'
 export const createTurnos = async (req, res) =>{
     try {
-        const { fechaInicio, fechaFin, estilista } = req.body;
 
-        // Crear una nueva instancia del modelo Turno con los datos de la solicitud
-        const nuevoTurno = new Turno({
-            fechaInicio,
-            fechaFin,
-            estilista, 
-        });
+        const turno= Turno(req.body)     
+        const turnoSave= await turno.save()
 
-        // Guardar el nuevo turno en la base de datos
-        const turnoGuardado = await nuevoTurno.save();
-
-        res.status(201).json(turnoGuardado);
+        res.status(201).json(turnoSave);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Error al procesar la solicitud' });

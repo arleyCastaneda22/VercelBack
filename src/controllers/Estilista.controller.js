@@ -26,7 +26,7 @@ export const createEstilista = async (req, res) => {
 };
 export const listarEstilista= async(req, res)=>{
     try {
-        const estilista= await Estilista.find();
+        const estilista= await Estilista.find().populate('turnos');
          return res.status(200).json(estilista)
     } catch (error) {
         console.log(error)
