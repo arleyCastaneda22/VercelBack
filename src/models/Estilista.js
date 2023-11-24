@@ -27,8 +27,15 @@ const estilistaSchema = new Schema({
     estado: {
         type: Boolean,
         default: true
-    }
+    },
+    turnos: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Turno',
+        }
+    ]
 },
+
     {
         timestamps: true,
         versionKey: false
