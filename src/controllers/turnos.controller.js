@@ -17,7 +17,7 @@ export const listarTurnos=async(req,res)=>{
         if (!Turno) {
             return res.status(404).json({ message: 'No se encontraron turnos.' });
         }
-        const turno = await Turno.find().populate('estilista');
+        const turno = await Turno.find();
         return res.status(200).json(turno)
     } catch (error) {
         console.log(error)
