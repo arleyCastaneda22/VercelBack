@@ -7,6 +7,7 @@ import { createRoles }  from './libs/initialSetup.js'
 import EstilistaRouter from './routes/estilista.routes.js'
 import ClienteRouter from './routes/cliente.routes.js'
 import authRouther from './routes/auth.routes.js'
+import ServicioRouter from './routes/servicio.routes.js'
 import UsuarioRouter from './routes/usuario.routes.js'
 import RoleRouter from './routes/role.routes.js'
 // Database connection
@@ -20,6 +21,7 @@ createRoles();
 app.use(cors());
 app.use(cookieParser());
 app.use(express.json());
+app.use(express.static('public'))
 
 //Rutas
 app.use('/',authRouther)
@@ -28,6 +30,7 @@ app.use('/api', EstilistaRouter)
 
 app.use('/api', ClienteRouter)
 
+app.use('/api', ServicioRouter)
 app.use('/api', UsuarioRouter )
 
 app.use('/api',RoleRouter)
