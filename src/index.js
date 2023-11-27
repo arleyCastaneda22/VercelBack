@@ -3,14 +3,18 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 //modulos
+import { createRoles }  from './libs/initialSetup.js'
 import EstilistaRouter from './routes/estilista.routes.js'
 import ClienteRouter from './routes/cliente.routes.js'
 import authRouther from './routes/auth.routes.js'
 import UsuarioRouter from './routes/usuario.routes.js'
+import RoleRouter from './routes/role.routes.js'
 // Database connection
 import('./database/database.js');
 
 const app = express();
+//crea roles por defecto
+createRoles();
 
 // Middleware
 app.use(cors());
@@ -25,6 +29,8 @@ app.use('/api', EstilistaRouter)
 app.use('/api', ClienteRouter)
 
 app.use('/api', UsuarioRouter )
+
+app.use('/api',RoleRouter)
 
 // Routes
 // app.use('/api', routes);

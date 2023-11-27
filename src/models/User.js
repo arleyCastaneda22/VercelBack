@@ -3,10 +3,7 @@ import {Schema, model} from 'mongoose';
 import bcryptjs from 'bcryptjs'
 
 const userSchema = new mongoose.Schema({
-    // id_usuario: {
-    //     type: Number,
-    //     required: true,
-    // },
+
     email: {
         type: String,
         unique:true,
@@ -26,10 +23,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         required:true
     },
-    // id_rol: {
-    //     type: Number,
-    //     required: true,
-    // },
+    roles: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Role',
+    }],
     // foto_perfil: {
     //     type: String,
     //     max: 200,
