@@ -21,3 +21,25 @@ export const createRole = async (req, res) => {
       res.status(500).json({ error: 'Error de servidor' });
     }
   };
+
+
+  export const listarRoles = async(req, res)=>{
+    try {
+        const role= await Role.find();
+        res.status(200).json(role)
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({message: error.message})
+    }
+}
+
+export const listarUnRole=async(req,res)=>{
+  try {
+      const id = req.params.id;
+      const role = await Role.findById(id);
+      res.status(200).send(role)
+  } catch (error) {
+      console.log(error)
+      return res.status(500).json({message: error.message})
+  }
+}
