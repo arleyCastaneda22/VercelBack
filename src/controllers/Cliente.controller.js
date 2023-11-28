@@ -75,8 +75,4 @@ export const actualizarEstado = async (req, res) => {
         console.error(error);
         res.status(500).json({ message: error.message });
     }
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> 438fa9f9b4d2b66d8c04332a69f889f5fb1edc42

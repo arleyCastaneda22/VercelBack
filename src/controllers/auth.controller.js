@@ -42,7 +42,7 @@ export const register = async(req,res) =>{
         await user.save()
 
         //genera el token jwt
-        const token = jwt.sign({ _id: user._id }, 'secretKey', {
+        const token = jwt.sign({ _id: user._id, roles: user.roles }, 'secretKey', {
             expiresIn: 86400 // 24 horas
         });
 
@@ -83,7 +83,7 @@ export const login = async (req,res) =>{
         
         //generar el token
                                                 
-        const token = jwt.sign({_id: user._id}, "secretKey",{
+        const token = jwt.sign({_id: user._id, roles: user.roles}, "secretKey",{
             expiresIn: 86400
         })
 
