@@ -83,9 +83,12 @@ export const login = async (req,res) =>{
         
         //generar el token
                                                 
-        const token = jwt.sign({_id: user._id, roles: user.roles}, "secretKey",{
-            expiresIn: 86400
-        })
+        const token = jwt.sign({
+            _id: user._id,
+            roles: user.roles.map(role => role.nombre) // Mapear solo los nombres de los roles
+        }, 'secretKey', {
+            expiresIn: 86400 // 24 horas
+        });
 
         console.log(user)
 
