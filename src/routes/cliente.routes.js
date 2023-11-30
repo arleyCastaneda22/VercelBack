@@ -15,6 +15,5 @@ router.get('/clientes', listarCliente)
 
     .delete('/clientes/:id', eliminarCliente)
 
-    .put('/clientes/:id/estado', actualizarEstado);
 
 export default router;
