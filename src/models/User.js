@@ -31,10 +31,10 @@ const userSchema = new mongoose.Schema({
     //     type: String,
     //     max: 200,
     // },
-    // estado: {
-    //     type: Number,
-    //     default: 1,
-    // },
+    estado: {
+        type: Boolean,
+        default: true,
+    },
 },{
     //funcion que agrega los campos created at y edited at
     timestamps:true
