@@ -50,7 +50,7 @@ export const eliminarUsuario=async(req,res)=>{
 export const actualizarEstado=async(req,res)=>{
     try {
         const id = req.params.id;
-        const actualizadoEstado = await Estilista.findById(id)
+        const actualizadoEstado = await User.findById(id)
         actualizadoEstado.estado=!actualizadoEstado.estado;
         await actualizadoEstado.save()
         res.status(204).json(actualizadoEstado);
