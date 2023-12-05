@@ -7,7 +7,7 @@ import * as auth from '../middlewares/authjwt.js';
 
 const router = Router();
 
-router.get('/usuarios',[auth.verifyToken,auth.isAdmin],listarUsuarios)
+router.get('/usuarios',listarUsuarios)
 
     .get('/usuarios/:id', listarUnUsuario)
 
