@@ -1,5 +1,5 @@
 import Router from 'express'
-import {listarUsuarios,listarUnUsuario,editarUsuario,eliminarUsuario} from '../controllers/Usuario.controller.js'
+import {listarUsuarios,listarUnUsuario,editarUsuario,eliminarUsuario, actualizarEstado} from '../controllers/Usuario.controller.js'
 import {register} from '../controllers/auth.controller.js'
 
 import * as auth from '../middlewares/authjwt.js';
@@ -14,6 +14,8 @@ router.get('/usuarios',listarUsuarios)
     .post('/usuarios', register)
 
     .put('/usuarios/:id', editarUsuario)
+
+    .get('/usuarios/estado/:id', actualizarEstado)
 
     .delete('/usuarios/:id', eliminarUsuario)
 
