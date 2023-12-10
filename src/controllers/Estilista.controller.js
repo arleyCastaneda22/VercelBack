@@ -1,20 +1,62 @@
 
 import Estilista from'../models/Estilista.js'
+import { Role } from '../models/Role.js' 
+import jwt from 'jsonwebtoken'
 
 //Para crear estilista
-export const createEstilista = async(req,res)=>{
+export const createEstilista = async (req, res) => {
     try {
-        const estilista= Estilista(req.body)
-        
-        const estilistaSave= await estilista.save()
-        res.status(201).json(estilistaSave)
-        
+        const { email, nombre, apellido, telefono, contrasena } = req.body;
+
+        // Verificar si el estilista ya existe
+        let estilistaExistente = await Estilista.findOne({ email });
+
+        // Si encuentra el email, arroja un error indicando que el correo ya existe
+        if (estilistaExistente) {
+            throw { code: 11000 };
+        }
+
+        // Crear un nuevo estilista
+        const nuevoEstilista = new Estilista({ email, nombre, apellido, contrasena, telefono });
+
+        // Obtener el rol por defecto "estilista"
+        const defaultRole = await Role.findOne({ nombre: 'estilista' });
+
+        // Verificar que el rol por defecto esté creado
+        if (!defaultRole) {
+            throw new Error('Rol por defecto "estilista" no encontrado');
+        }
+
+        // Asignar el rol al estilista
+        nuevoEstilista.roles = [defaultRole._id];
+
+        // Guardar el estilista en la base de datos
+        await nuevoEstilista.save();
+
+        // Generar el token JWT
+        const token = jwt.sign(
+            {
+                _id: nuevoEstilista._id,
+                roles: nuevoEstilista.roles.map(role => role.nombre)
+            },
+            'tu_clave_secreta_aqui',
+            { expiresIn: '24h' }
+        );
+
+        console.log(nuevoEstilista);
+
+        // Enviar la respuesta con el token
+        res.status(201).json({ token });
     } catch (error) {
-        console.log(error)
-        res.status(500).json({mesage:error.mesage})
-        
+        console.log(error.message);
+        // Manejar los errores, incluyendo el código 11000 para el email duplicado
+        if (error.code === 11000) {
+            return res.status(400).json({ error: 'Este correo electrónico ya existe' });
+        }
+        // Respuesta por defecto en caso de otros errores
+        return res.status(500).json({ error: 'Error interno del servidor' });
     }
-}
+};
 
 export const listarEstilista= async(req, res)=>{
     try {
