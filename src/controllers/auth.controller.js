@@ -73,6 +73,10 @@ export const login = async (req, res) => {
         // Autenticación de usuario
         let usuario = await User.findOne({ email }).populate("roles");
 
+        if (!usuario.estado) {
+            return res.status(400).json({ error: 'El usuario está inactivo' });
+        }
+
         // Si el usuario no existe, intenta encontrar un estilista con el mismo correo electrónico
         if (!usuario) {
             let estilista = await Estilista.findOne({ email }).populate("roles");
@@ -80,6 +84,11 @@ export const login = async (req, res) => {
             // Si el estilista no existe, las credenciales son inválidas
             if (!estilista) {
                 return res.status(403).json({ error: 'Credenciales inválidas' });
+            }
+
+             // Verificar si el estilista está inactivo
+             if (!estilista.estado) {
+                return res.status(400).json({ error: 'El estilista está inactivo' });
             }
 
             // Compara las contraseñas del estilista
