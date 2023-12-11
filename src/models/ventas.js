@@ -15,7 +15,11 @@ const ventasSchema = new Schema({
     metodoPago:{
         type:String,
         required:true
-    }
+    },
+    estado: {
+        type: Boolean,
+        default: false
+    },
 },{
     timestamps:true,
     versionKey:false

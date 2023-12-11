@@ -24,7 +24,7 @@ export const obtenerVentas = async (req, res) => {
 export const obtenerVentaPorId = async (req, res) => {
     const { id } = req.params;
     try {
-        const venta = await Ventas.findById(id);
+        const venta = await Ventas.findById(id).populate('servicio').populate('cliente');
         res.status(200).json(venta);
     } catch (error) {
         res.status(404).json({ mensaje: 'Venta no encontrada', error: error.message });
@@ -52,3 +52,16 @@ export const eliminarVenta = async (req, res) => {
         res.status(404).json({ mensaje: 'Venta no encontrada o error al eliminar', error: error.message });
     }
 };
+
+export const actualizarEstado=async(req,res)=>{
+    try {
+        const id = req.params.id;
+        const actualizadoEstado = await Ventas.findById(id)
+        actualizadoEstado.estado=!actualizadoEstado.estado;
+        await actualizadoEstado.save()
+        res.status(204).json(actualizadoEstado);
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({message: error.message})
+    }
+}
