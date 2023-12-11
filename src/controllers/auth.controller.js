@@ -1,7 +1,12 @@
 import { User } from "../models/User.js"
+<<<<<<< HEAD
 import { Role } from '../models/Role.js'
 import { transporter } from '../helpers/nodemailer.js'
 import bcrypt from 'bcrypt';
+=======
+import { Role } from '../models/Role.js' 
+import Estilista from'../models/Estilista.js'
+>>>>>>> Fernando
 import { validationResult } from "express-validator"
 import jwt from 'jsonwebtoken'
 
@@ -69,6 +74,7 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
     try {
+<<<<<<< HEAD
         const { email, contrasena } = req.body
 
         let user = await User.findOne({ email }).populate("roles");
@@ -91,18 +97,84 @@ export const login = async (req, res) => {
         }, 'secretKey', {
             expiresIn: 86400 // 24 horas
         });
+=======
+        const { email, contrasena } = req.body;
 
-        console.log(user)
+        // Autenticación de usuario
+        let usuario = await User.findOne({ email }).populate("roles");
 
+        if (!usuario.estado) {
+            return res.status(400).json({ error: 'El usuario está inactivo' });
+        }
+
+        // Si el usuario no existe, intenta encontrar un estilista con el mismo correo electrónico
+        if (!usuario) {
+            let estilista = await Estilista.findOne({ email }).populate("roles");
+>>>>>>> Fernando
+
+            // Si el estilista no existe, las credenciales son inválidas
+            if (!estilista) {
+                return res.status(403).json({ error: 'Credenciales inválidas' });
+            }
+
+<<<<<<< HEAD
         return res.status(200).json({ token })
 
+=======
+             // Verificar si el estilista está inactivo
+             if (!estilista.estado) {
+                return res.status(400).json({ error: 'El estilista está inactivo' });
+            }
+>>>>>>> Fernando
 
+            // Compara las contraseñas del estilista
+            const contrasenaValida = await estilista.comparePassword(contrasena);
 
+            // Si la contraseña es válida, genera el token JWT
+            if (contrasenaValida) {
+                const token = jwt.sign(
+                    {
+                        _id: estilista._id,
+                        roles: estilista.roles.map(role => role.nombre)
+                    },
+                    'secretKey',
+                    { expiresIn: '24h' }
+                );
 
+<<<<<<< HEAD
     } catch (error) {
         console.log(error.message)
         return res.status(500).json({ error: "Error de servidor" })
 
+=======
+                return res.status(200).json({ token });
+            } else {
+                return res.status(403).json({ error: 'Credenciales inválidas' });
+            }
+        }
+
+        // Compara las contraseñas del usuario
+        const respuestaPasswordUsuario = await usuario.comparePassword(contrasena);
+
+        // Si la contraseña del usuario es válida, genera el token JWT
+        if (respuestaPasswordUsuario) {
+            const token = jwt.sign(
+                {
+                    _id: usuario._id,
+                    roles: usuario.roles.map(role => role.nombre)
+                },
+                'secretKey',
+                { expiresIn: '24h' }
+            );
+
+            return res.status(200).json({ token });
+        } else {
+            return res.status(403).json({ error: 'Credenciales inválidas' });
+        }
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ error: 'Error de servidor' });
+>>>>>>> Fernando
     }
 };
 
