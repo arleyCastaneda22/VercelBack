@@ -25,11 +25,11 @@ const servicioSchema=new Schema({
         type:Boolean,
         default:true
     },
-    estilista: {
+    estilista: [{
         type: Schema.Types.ObjectId,  // Tipo de referencia ObjectId
         ref: 'Estilista',  // Nombre del modelo a referenciar
         required: true
-    }
+    }]
 },{
     timestamps:true,
     versionKey:false
