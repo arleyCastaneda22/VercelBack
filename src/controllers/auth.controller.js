@@ -2,6 +2,8 @@ import { User } from "../models/User.js"
 import { Role } from '../models/Role.js' 
 import Estilista from'../models/Estilista.js'
 import { validationResult } from "express-validator"
+import{transporter} from '../helpers/nodemailer.js'
+import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 
 
