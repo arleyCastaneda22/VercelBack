@@ -1,7 +1,6 @@
 import { User } from "../models/User.js"
-import { Role } from '../models/Role.js'
-import { transporter } from '../helpers/nodemailer.js'
-import bcrypt from 'bcrypt';
+import { Role } from '../models/Role.js' 
+import Estilista from'../models/Estilista.js'
 import { validationResult } from "express-validator"
 import jwt from 'jsonwebtoken'
 
@@ -69,40 +68,71 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
     try {
-        const { email, contrasena } = req.body
+        const { email, contrasena } = req.body;
 
-        let user = await User.findOne({ email }).populate("roles");
+        // Autenticación de usuario
+        let usuario = await User.findOne({ email }).populate("roles");
 
-        //maneja los errores en caso de que no se encuentre el usuario 
-        if (!user)
-            return res.status(403).json({ error: 'El usuario NO existe' });
+        // Si el usuario no existe, intenta encontrar un estilista con el mismo correo electrónico
+        if (!usuario) {
+            let estilista = await Estilista.findOne({ email }).populate("roles");
 
-        const respuestaPassword = await user.comparePassword(contrasena);
+            // Si el estilista no existe, las credenciales son inválidas
+            if (!estilista) {
+                return res.status(403).json({ error: 'Credenciales inválidas' });
+            }
 
-        //no coincida las contraseñas
-        if (!respuestaPassword)
-            return res.status(403).json({ error: 'Contraseña incorrecta' });
+            // Verificar si el estilista está inactivo
+            if (!estilista.estado) {
+                return res.status(400).json({ error: 'El estilista está inactivo' });
+            }
 
-        //generar el token
+            // Compara las contraseñas del estilista
+            const contrasenaValida = await estilista.comparePassword(contrasena);
 
-        const token = jwt.sign({
-            _id: user._id,
-            roles: user.roles.map(role => role.nombre) // Mapear solo los nombres de los roles
-        }, 'secretKey', {
-            expiresIn: 86400 // 24 horas
-        });
+            // Si la contraseña es válida, genera el token JWT
+            if (contrasenaValida) {
+                const token = jwt.sign(
+                    {
+                        _id: estilista._id,
+                        roles: estilista.roles.map(role => role.nombre)
+                    },
+                    'secretKey',
+                    { expiresIn: '24h' }
+                );
 
-        console.log(user)
+                return res.status(200).json({ token });
+            } else {
+                return res.status(403).json({ error: 'Credenciales inválidas' });
+            }
+        }
 
-        return res.status(200).json({ token })
+        // Verificar si el usuario está inactivo
+        if (!usuario.estado) {
+            return res.status(400).json({ error: 'El usuario está inactivo' });
+        }
 
+        // Compara las contraseñas del usuario
+        const respuestaPasswordUsuario = await usuario.comparePassword(contrasena);
 
+        // Si la contraseña del usuario es válida, genera el token JWT
+        if (respuestaPasswordUsuario) {
+            const token = jwt.sign(
+                {
+                    _id: usuario._id,
+                    roles: usuario.roles.map(role => role.nombre)
+                },
+                'secretKey',
+                { expiresIn: '24h' }
+            );
 
-
+            return res.status(200).json({ token });
+        } else {
+            return res.status(403).json({ error: 'Credenciales inválidas' });
+        }
     } catch (error) {
-        console.log(error.message)
-        return res.status(500).json({ error: "Error de servidor" })
-
+        console.log(error.message);
+        return res.status(500).json({ error: 'Error de servidor' });
     }
 };
 
