@@ -34,8 +34,10 @@ const estilistaSchema = new Schema({
     estado: {
         type: Boolean,
         default: true
-    }
+    },
+   
 },
+
     {
         timestamps: true,
         versionKey: false

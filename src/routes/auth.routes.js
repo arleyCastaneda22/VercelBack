@@ -1,7 +1,7 @@
 import Router from 'express'
 import express from 'express'
 import { body } from 'express-validator'
-import { login, register } from '../controllers/auth.controller.js';
+import { login, register, recuperarContraseña,  actualizarContraseña} from '../controllers/auth.controller.js';
 import { validationResultExpress } from '../middlewares/validationResultExpress.js';
 // auth.routes.js
 import jwt from 'jsonwebtoken';
@@ -39,6 +39,8 @@ router.post("/login",[
     login
     );
 
+router.post("/forgot-password", recuperarContraseña)
 
+router.put('/cambio/:id/:token',actualizarContraseña )
 
 export default router;

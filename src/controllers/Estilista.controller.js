@@ -72,6 +72,9 @@ export const listarUnEstilista=async(req,res)=>{
     try {
         const id = req.params.id;
         const estilista = await Estilista.findById(id);
+        if (!estilista) {
+            return res.status(404).json({ error: 'Estilista no encontrado.' });
+          }
         res.status(200).send(estilista)
     } catch (error) {
         console.log(error)
@@ -83,6 +86,9 @@ export const editarEstilista=async(req,res)=>{
     try {
         const id=req.params.id;
         const actualizadoEstilista= await Estilista.findByIdAndUpdate(id, req.body);
+        if (!actualizadoEstilista) {
+            return res.status(404).json({ error: 'Estilista no encontrado.' });
+          }
         res.status(204).json(actualizadoEstilista);
         
     } catch (error) {
@@ -95,6 +101,9 @@ export const eliminarEstilista=async(req,res)=>{
     try {
         const id =req.params.id;
         const eliminadoEstilista=await Estilista.deleteOne({_id:id});
+        if (!eliminadoEstilista) {
+            return res.status(404).json({ error: 'Estilista no encontrado.' });
+        }
         res.status(204).json(eliminadoEstilista);
     } catch (error) {
         console.log(error)
