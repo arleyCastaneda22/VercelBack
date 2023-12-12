@@ -72,14 +72,10 @@ export const login = async (req, res) => {
     try {
         const { email, contrasena } = req.body;
 
-        // Autenticación de usuario
+        // Intenta encontrar un usuario con el mismo correo electrónico
         let usuario = await User.findOne({ email }).populate("roles");
 
-        if (!usuario.estado) {
-            return res.status(400).json({ error: 'El usuario está inactivo' });
-        }
-
-        // Si el usuario no existe, intenta encontrar un estilista con el mismo correo electrónico
+        // Si el usuario no existe, intenta encontrar un estilista
         if (!usuario) {
             let estilista = await Estilista.findOne({ email }).populate("roles");
 
@@ -88,8 +84,8 @@ export const login = async (req, res) => {
                 return res.status(403).json({ error: 'Credenciales inválidas' });
             }
 
-             // Verificar si el estilista está inactivo
-             if (!estilista.estado) {
+            // Verificar si el estilista está inactivo
+            if (!estilista.estado) {
                 return res.status(400).json({ error: 'El estilista está inactivo' });
             }
 
@@ -111,6 +107,16 @@ export const login = async (req, res) => {
             } else {
                 return res.status(403).json({ error: 'Credenciales inválidas' });
             }
+        }
+
+        // Si el usuario no existe, las credenciales son inválidas
+        if (!usuario) {
+            return res.status(403).json({ error: 'Credenciales inválidas' });
+        }
+
+        // Si el usuario está inactivo, retorna un error
+        if (!usuario.estado) {
+            return res.status(400).json({ error: 'El usuario está inactivo' });
         }
 
         // Compara las contraseñas del usuario
@@ -136,6 +142,7 @@ export const login = async (req, res) => {
         return res.status(500).json({ error: 'Error de servidor' });
     }
 };
+
 
 export const recuperarContraseña = async (req, res) => {
     try {
