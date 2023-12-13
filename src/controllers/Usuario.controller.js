@@ -24,25 +24,35 @@ export const listarUnUsuario=async(req,res)=>{
 }
 
 export const editarUsuario = async (req, res) => {
+    const id = req.params.id;
+    const { email, nombre, apellido, contrasena, roles  } = req.body;
     try {
-        const id = req.params.id;
-        const { contrasena, ...restoDatos } = req.body;
+
+        const existingUser = await User.findOne({ email, _id: { $ne: id } });
+        if (existingUser) {
+            throw { code: 11000, message: 'Este correo electrónico ya existe' };
+        }
 
         // Verificar si se proporcionó una nueva contraseña
-        if (contrasena) {
+        else if (contrasena) {
             // Hash de la nueva contraseña
             const hashedPassword = await bcrypt.hash(contrasena, 10);
             // Actualizar la contraseña del usuario
-            await User.findByIdAndUpdate(id, { contrasena: hashedPassword, ...restoDatos });
+            await User.findByIdAndUpdate(id, { contrasena: hashedPassword, email, nombre, apellido, roles});
         } else {
             // Si no se proporcionó una nueva contraseña, actualizar otros datos solamente
-            await User.findByIdAndUpdate(id, restoDatos);
+            await User.findByIdAndUpdate(id, { email, nombre, apellido, roles });
         }
 
         res.status(204).json({ mensaje: 'Usuario actualizado con éxito' });
 
     } catch (error) {
-        console.log(error)
+        console.log(error.message)
+
+    // Manejar los errores, incluyendo el código 11000 para el email duplicado
+    if (error.code === 11000) {
+        return res.status(400).json({ error: 'Este correo electrónico ya existe' });
+    }
         return res.status(500).json({ message: error.message })
     }
 };
