@@ -147,14 +147,53 @@ export const login = async (req, res) => {
 export const recuperarContraseña = async (req, res) => {
     try {
         const { email } = req.body;
-        const user = await User.findOne({ email })
 
+        // Buscar usuario
+        const user = await User.findOne({ email });
+
+        // Buscar estilista si el usuario no existe
         if (!user) {
-            return res.status(403).json({ error: 'El usuario NO existe' });
+            const estilista = await Estilista.findOne({ email });
+
+            if (!estilista) {
+                return res.status(403).json({ error: 'El usuario o estilista NO existe' });
+            }
+
+            // Generar token y enviar correo para el estilista
+            const token = jwt.sign({ email: estilista.email, id: estilista._id }, 'secreto', { expiresIn: '5m' });
+            const link = `http://localhost:4200/reset-password/${estilista._id}/${token}`;
+
+
+  
+            const htmlMessage = `
+            <p>¡Hola ${estilista.nombre}!</p>
+            <p>Hemos recibido una solicitud para restablecer tu contraseña. Para completar este proceso, sigue estos sencillos pasos:</p>
+            <ol>
+              <li>Haz clic en el siguiente enlace para ir a la página de cambio de contraseña: <a href="${link}">${link}</a></li>
+              <li>Ingresa tu nueva contraseña siguiendo nuestras recomendaciones de seguridad.</li>
+              <li>Confirma la nueva contraseña.</li>
+            </ol>
+            <p>Recuerda que tu seguridad es nuestra prioridad. Nunca compartas tu contraseña con nadie y elige contraseñas fuertes y únicas.</p>
+            <p>Si necesitas ayuda o tienes alguna pregunta, no dudes en contactarnos.</p>
+            <p>Gracias por confiar en nosotros.</p>
+            <p>Saludos,<br/>Tu Empresa</p>
+          `;
+    
+            await transporter.sendMail({
+                from: '"Cambio de contraseña 👻" <beautysoft262@gmail.com>', // sender address
+                to: email, // list of receivers
+                subject: "Cambio de contraseña", // Subject line
+                text: "Hello world?", // plain text body
+                html: htmlMessage, // html body
+            });
+
+            return res.status(200).json({ ok: true, link });
         }
 
-        const token = jwt.sign({ email: user.email, id: user._id }, 'secreto', { expiresIn: '5m' })
-        const link = `http://localhost:4200/reset-password/${user._id}/${token}`
+        // Generar token y enviar correo para el usuario
+        const token = jwt.sign({ email: user.email, id: user._id }, 'secreto', { expiresIn: '5m' });
+        const link = `http://localhost:4200/reset-password/${user._id}/${token}`;
+ 
         const htmlMessage = `
         <p>¡Hola ${user.nombre}!</p>
         <p>Hemos recibido una solicitud para restablecer tu contraseña. Para completar este proceso, sigue estos sencillos pasos:</p>
@@ -177,13 +216,13 @@ export const recuperarContraseña = async (req, res) => {
             html: htmlMessage, // html body
         });
 
-        res.status(200).json({ ok: true, link })
-    } catch (error) {
-        console.log(error.message)
-        return res.status(500).json({ error: "Error de servidor" })
-    }
+        return res.status(200).json({ ok: true, link });
 
-}
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ error: "Error de servidor" });
+    }
+};
 export const actualizarContraseña = async (req, res) => {
     const { id, token } = req.params;
     const { contrasena } = req.body
@@ -192,9 +231,29 @@ export const actualizarContraseña = async (req, res) => {
         // Verificar el token
         const user = await User.findOne({ _id: id });
         if (!user) {
-            return res.status(403).json({ error: 'El usuario no existe' });
-        }
+            const estilista = await Estilista.findOne({ _id:id });
+            if(!estilista){
+                try {
+                    jwt.verify(token, 'secreto');
+                } catch (tokenError) {
+                    if (tokenError.name === 'TokenExpiredError') {
+                        return res.status(401).json({ error: 'El token ha expirado' });
+                    } else {
+                        throw tokenError; 
+                    }
+                }
+        
+                // Hash de la nueva contraseña
+                const hashedPassword = await bcrypt.hash(contrasena, 10);
+        
+                // Actualizar la contraseña del usuario
+                await estilista.updateOne({ _id: id }, { $set: { contrasena: hashedPassword } });
+        
+                res.status(204).json({ mensaje: 'Contraseña actualizada con éxito' });
+            }
 
+
+        }
         try {
             jwt.verify(token, 'secreto');
         } catch (tokenError) {
