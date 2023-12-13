@@ -53,7 +53,7 @@ estilistaSchema.pre("save", async function(next){
     if(!estilista.isModified('contrasena')) return next();
 
     try{
-        const salt = await bcryptjs.genSalt(10)
+        const salt = await bcrypt.genSalt(10)
         estilista.contrasena = await bcrypt.hash(estilista.contrasena,salt)
         next();
     }catch(error){

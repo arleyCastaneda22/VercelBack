@@ -6,16 +6,8 @@ const servicioSchema=new Schema({
         require:true
     },
     duracion:{
-        type:String,
+        type:Number,
         require:true,
-        validate: {
-            validator: function (value) {
-              // Validar que la cadena tenga el formato HH:MM
-              const regex = /^([01]\d|2[0-3]):([0-5]\d)$/;
-              return regex.test(value);
-            },
-            message: 'Formato de hora no válido. Debe ser HH:MM.',
-          },
     },
     precio:{
         type:Number,
