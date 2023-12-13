@@ -5,8 +5,9 @@ import jwt from 'jsonwebtoken'
 
 //Para crear estilista
 export const createEstilista = async (req, res) => {
+    const { email, nombre, apellido, telefono, contrasena } = req.body;
+    
     try {
-        const { email, nombre, apellido, telefono, contrasena } = req.body;
 
         // Verificar si el estilista ya existe
         let estilistaExistente = await Estilista.findOne({ email });
