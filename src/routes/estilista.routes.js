@@ -1,5 +1,5 @@
 import Router from 'express'
-import { createEstilista, listarEstilista, listarUnEstilista, editarEstilista, eliminarEstilista, actualizarEstado } from '../controllers/Estilista.controller.js'
+import { createEstilista, listarEstilista, listarUnEstilista, editarEstilista, eliminarEstilista, actualizarEstado, actualizarContraseña } from '../controllers/Estilista.controller.js'
 
 const router = Router();
 
@@ -10,6 +10,8 @@ router.get('/estilistas', listarEstilista)
     .post('/estilistas', createEstilista)
 
     .put('/estilistas/:id', editarEstilista)
+
+    .put('/estilistas/contrasena/:id', actualizarContraseña)
 
     .get('/estilistas/estado/:id', actualizarEstado)
 

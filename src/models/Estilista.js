@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 import mongoose from 'mongoose';
-import bcryptjs from 'bcryptjs'
+import bcrypt from 'bcrypt';
 
 const estilistaSchema = new Schema({
     nombre: {
@@ -54,7 +54,7 @@ estilistaSchema.pre("save", async function(next){
 
     try{
         const salt = await bcryptjs.genSalt(10)
-        estilista.contrasena = await bcryptjs.hash(estilista.contrasena,salt)
+        estilista.contrasena = await bcrypt.hash(estilista.contrasena,salt)
         next();
     }catch(error){
         console.log(error)
@@ -63,10 +63,15 @@ estilistaSchema.pre("save", async function(next){
     }
 });
 
-
+// Método para comparar contraseñas
 estilistaSchema.methods.comparePassword = async function(candidatePassword){
-    return await bcryptjs.compare(candidatePassword, this.contrasena);
-};
+    try {
+        return await bcrypt.compare(candidatePassword, this.contrasena);
+      } catch (error) {
+        console.error(error);
+        throw new Error('Error al comparar contraseñas');
+      }
+    };
 
 export default model('Estilista', estilistaSchema)
 
