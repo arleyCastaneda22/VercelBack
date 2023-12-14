@@ -10,29 +10,29 @@ import jwt from 'jsonwebtoken'
 
 
 export const register = async (req, res) => {
+    const { email, nombre, apellido, contrasena, roles } = req.body;
 
-    //alternativa validacion buscando por email
-
-    const { email, nombre, apellido, contrasena, roles } = req.body
     try {
-        //verifica si el usuario existe
+        // Verifica si el usuario existe
         let user = await User.findOne({ email });
-        //si encuentra el email que estamos registrando arroja el error que ya el correo existe
-        if (user)
-            throw { code: 11000 };
 
-        //Si no existe, crea un nuevo usuario (objeto)
+        // Si encuentra el email, arroja el error de que el correo ya existe
+        if (user) {
+            throw { code: 11000 };
+        }
+
+        // Si no existe, crea un nuevo usuario (objeto)
         user = new User({ email, nombre, apellido, contrasena });
 
-        //verifica que el rol este en la lista de roles
-        if (roles) {
-            const foundRoles = await Role.find({ nombre: { $in: roles } })
-            user.roles = foundRoles.map(role => role._id)
+        // Verifica y asigna los roles
+        if (roles && roles.length > 0) {
+            const foundRoles = await Role.find({ nombre: { $in: roles } });
+            user.roles = foundRoles.map(role => role._id);
         } else {
-            // Obtiene el rol por defecto (cliente)
+            // Obtiene el rol por defecto ('cliente')
             const defaultRole = await Role.findOne({ nombre: 'cliente' });
 
-            //verifica que el rol por defecto se encuentre creado
+            // Verifica que el rol por defecto se encuentre creado
             if (!defaultRole) {
                 throw new Error('Rol por defecto no encontrado');
             }
@@ -41,30 +41,29 @@ export const register = async (req, res) => {
             user.roles = [defaultRole._id];
         }
 
-        //guardar usuario
-        await user.save()
+        // Guarda el usuario
+        await user.save();
 
-        //genera el token jwt
+        // Genera el token JWT
         const token = jwt.sign({ _id: user._id, roles: user.roles }, 'secretKey', {
             expiresIn: 86400 // 24 horas
         });
 
-        console.log(user)
+        console.log(user);
 
-        res.status(201).json({ token })
+        res.status(201).json({ token });
 
-        //maneja los errores
     } catch (error) {
         console.log(error.message);
-        // alternatica por defecto, por codigos de error de mongoose
-        if (error.code === 11000) {
-            return res.status(400).json({ error: 'Este correo electronico ya existe' })
-        }
-        //respuesta por defecto
-        return res.status(500).json({ error: "Error interno del servidor" })
-    }
 
-}
+        // Maneja los errores, incluyendo el código 11000 para el email duplicado
+        if (error.code === 11000) {
+            return res.status(400).json({ error: 'Este correo electrónico ya existe' });
+        }
+        // Respuesta por defecto
+        return res.status(500).json({ error: "Error interno del servidor" });
+    }
+};
 
 
 
