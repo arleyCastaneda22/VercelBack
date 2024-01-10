@@ -225,57 +225,62 @@ export const recuperarContraseña = async (req, res) => {
 };
 export const actualizarContraseña = async (req, res) => {
     const { id, token } = req.params;
-    const { contrasena } = req.body
-
+    const { contrasena } = req.body;
+  
     try {
-        // Verificar el token
-        const user = await User.findOne({ _id: id });
-        if (!user) {
-            const estilista = await Estilista.findOne({ _id:id });
-            if(!estilista){
-                try {
-                    jwt.verify(token, 'secreto');
-                } catch (tokenError) {
-                    if (tokenError.name === 'TokenExpiredError') {
-                        return res.status(401).json({ error: 'El token ha expirado' });
-                    } else {
-                        throw tokenError; 
-                    }
-                }
-        
-                // Hash de la nueva contraseña
-                const hashedPassword = await bcrypt.hash(contrasena, 10);
-        
-                // Actualizar la contraseña del usuario
-                await estilista.updateOne({ _id: id }, { $set: { contrasena: hashedPassword } });
-        
-                res.status(204).json({ mensaje: 'Contraseña actualizada con éxito' });
-            }
-
-
+      let usuario = await User.findOne({ _id: id });
+  
+      if (!usuario) {
+        const estilista = await Estilista.findOne({ _id: id });
+  
+        if (!estilista) {
+          return res.status(404).json({ error: 'Usuario o estilista no encontrado' });
         }
+  
+        // Verificar el token para estilista
         try {
-            jwt.verify(token, 'secreto');
+          jwt.verify(token, 'secreto');
         } catch (tokenError) {
-            if (tokenError.name === 'TokenExpiredError') {
-                return res.status(401).json({ error: 'El token ha expirado' });
-            } else {
-                throw tokenError; 
-            }
+          if (tokenError.name === 'TokenExpiredError') {
+            return res.status(401).json({ error: 'El token ha expirado' });
+          } else {
+            throw tokenError;
+          }
         }
-
+  
         // Hash de la nueva contraseña
         const hashedPassword = await bcrypt.hash(contrasena, 10);
-
-        // Actualizar la contraseña del usuario
-        await User.updateOne({ _id: id }, { $set: { contrasena: hashedPassword } });
-
-        res.status(204).json({ mensaje: 'Contraseña actualizada con éxito' });
+  
+        // Actualizar la contraseña del estilista
+        await Estilista.updateOne({ _id: id }, { $set: { contrasena: hashedPassword } });
+  
+        return res.status(201).json({ mensaje: 'Contraseña actualizada con éxito de estilista' });
+      }
+  
+      // Verificar el token para usuario
+      try {
+        jwt.verify(token, 'secreto');
+      } catch (tokenError) {
+        if (tokenError.name === 'TokenExpiredError') {
+          return res.status(401).json({ error: 'El token ha expirado' });
+        } else {
+          throw tokenError;
+        }
+      }
+  
+      // Hash de la nueva contraseña
+      const hashedPassword = await bcrypt.hash(contrasena, 10);
+  
+      // Actualizar la contraseña del usuario
+      await User.updateOne({ _id: id }, { $set: { contrasena: hashedPassword } });
+  
+      return res.status(201).json({ mensaje: 'Contraseña actualizada con éxito de usuario' });
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: 'Error de servidor' });
+      console.error(error);
+      res.status(500).json({ error: 'Error de servidor' });
     }
-};
+  };
+  
 
 
 
