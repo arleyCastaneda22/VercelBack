@@ -85,28 +85,38 @@ export const listarUnEstilista=async(req,res)=>{
 }
 
 export const editarEstilista=async(req,res)=>{
+    const id=req.params.id;
+    const { email, nombre, apellido, contrasena, roles  } = req.body;
     try {
-        const id=req.params.id;
-        const { contrasena, ...restoDatos } = req.body;
+
+        const existingEstilista = await Estilista.findOne({ email, _id: { $ne: id } });
+
+        if (existingEstilista) {
+            throw { code: 11000, message: 'Este correo electrónico ya existe' };
+        }
 
          // Verificar si se proporcionó una nueva contraseña
-        if (contrasena) {
+        else if (contrasena) {
             // Hash de la nueva contraseña
             const hashedPassword = await bcrypt.hash(contrasena, 10);
             // Actualizar la contraseña del usuario
-            await Estilista.findByIdAndUpdate(id, { contrasena: hashedPassword, ...restoDatos });
+            await Estilista.findByIdAndUpdate(id, { contrasena: hashedPassword, email, nombre, apellido, roles});
         } else {
             // Si no se proporcionó una nueva contraseña, actualizar otros datos solamente
-            await Estilista.findByIdAndUpdate(id, restoDatos);
+            await User.findByIdAndUpdate(id, { email, nombre, apellido, roles });
         }
 
         res.status(204).json({ mensaje: 'Usuario actualizado con éxito' });
 
     } catch (error) {
         console.log(error)
-        return res.status(500).json({ message: error.message })
-    }
-};
+
+        if (error.code === 11000) {
+            return res.status(400).json({ error: 'Este correo electrónico ya existe' });
+        }
+            return res.status(500).json({ message: error.message })
+        }
+    };
 
 export const actualizarContraseña = async (req, res) => {
     const { id, token } = req.params;
