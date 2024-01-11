@@ -66,6 +66,7 @@ estilistaSchema.pre("save", async function(next){
 // Método para comparar contraseñas
 estilistaSchema.methods.comparePassword = async function(candidatePassword){
     try {
+        console.log('compareE', candidatePassword, 'contrasenaE', this.contrasena)
         return await bcrypt.compare(candidatePassword, this.contrasena);
       } catch (error) {
         console.error(error);

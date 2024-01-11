@@ -51,6 +51,7 @@ userSchema.pre('save', async function (next) {
 // Método para comparar contraseñas
 userSchema.methods.comparePassword = async function (candidatePassword) {
   try {
+    console.log('compareU', candidatePassword, 'contrasenaU', this.contrasena)
     return await bcrypt.compare(candidatePassword, this.contrasena);
   } catch (error) {
     console.error(error);
