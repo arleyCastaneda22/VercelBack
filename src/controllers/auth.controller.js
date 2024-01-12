@@ -27,6 +27,7 @@ export const register = async (req, res) => {
         // Verifica y asigna los roles
         if (roles && roles.length > 0) {
             const foundRoles = await Role.find({ nombre: { $in: roles } });
+            console.log(foundRoles); 
             user.roles = foundRoles.map(role => role._id);
         } else {
             // Obtiene el rol por defecto ('cliente')
