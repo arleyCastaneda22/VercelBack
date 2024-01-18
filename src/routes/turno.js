@@ -1,8 +1,15 @@
 import Router from 'express'
-import {createTurnos, listarTurnos} from '../controllers/turnos.controller.js'
+import {createTurnos, listarTurnos, actualizarEstado, editarTurno, listarUnTurno} from '../controllers/turnos.controller.js'
 const router=Router()
 
 router.post('/turnos', createTurnos)
-    .get('/turnos', listarTurnos)
+
+    .get('/turnos/:id', listarTurnos)
+
+    .get('/turnos/edit/:id', listarUnTurno)
+
+    .get('/turnos/estado/:id', actualizarEstado)
+    
+    .put('/turnos/:id', editarTurno)
 
 export default router;
