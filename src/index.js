@@ -13,6 +13,8 @@ import TurnosRouter from './routes/turno.js'
 import UsuarioRouter from './routes/usuario.routes.js'
 import RoleRouter from './routes/role.routes.js'
 import ventasRouter from './routes/ventas.routes.js'
+import CitaRouter from './routes/cita.routes.js'
+
 // Database connection
 import('./database/database.js');
 
@@ -40,6 +42,7 @@ app.use('/api', TurnosRouter)
 
 app.use('/api',RoleRouter)
 app.use('/api', ventasRouter)
+app.use('/api', CitaRouter)
 
 // Routes
 // app.use('/api', routes);
