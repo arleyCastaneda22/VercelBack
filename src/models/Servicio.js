@@ -6,7 +6,7 @@ const servicioSchema=new Schema({
         require:true
     },
     duracion:{
-        type:Number,
+        type:String,
         require:true,
     },
     precio:{

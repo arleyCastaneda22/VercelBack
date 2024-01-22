@@ -10,6 +10,14 @@ export const createTurnos = async (req, res) => {
     try {
         const { estilista, dia, inicioM, finM, inicioT, finT } = req.body;
 
+        // Convertir las fechas a objetos Date
+        const inicioMDate = new Date(inicioM);
+        const finMDate = new Date(finM);
+        const inicioTDate = new Date(inicioT);
+        const finTDate = new Date(finT);
+
+
+
         // Verificar si ya existe un turno para el mismo estilista en el mismo día
         const existingTurno = await Turno.findOne({ estilista, dia });
 
@@ -17,30 +25,41 @@ export const createTurnos = async (req, res) => {
             return res.status(400).json({ error: 'Ya existe un turno para el mismo estilista en el mismo día.' });
         }
 
+        if (inicioMDate >= finMDate) {
+            return res.status(400).json({ error: 'La hora de inicio de la mañana debe ser menor que la hora de fin de la mañana.' });
+        }
+
+        if (finMDate >= inicioTDate) {
+            return res.status(400).json({ error: 'La hora de fin de la mañana debe ser menor que la hora de inicio de la tarde.' });
+        }
+
+        if (finTDate <= inicioTDate || finTDate <= finMDate) {
+            return res.status(400).json({ error: 'La hora de fin de la tarde debe ser mayor que las horas de inicio y fin de la mañana.' });
+        }
 
         const turno = new Turno({
             estilista,
             dia,
-            inicioM: moment(inicioM, 'h:mm A').tz('America/Bogota').toDate(),
-            finM: moment(finM, 'h:mm A').tz('America/Bogota').toDate(),
-            inicioT: moment(inicioT, 'h:mm A').tz('America/Bogota').toDate(),
-            finT: moment(finT, 'h:mm A').tz('America/Bogota').toDate(),
+            inicioM: inicioMDate,
+            finM: finMDate,
+            inicioT: inicioTDate,
+            finT
         });
 
         const turnoSave = await turno.save();
-        
+
         res.status(201).json(turnoSave);
     } catch (error) {
-        // Manejar errores
         console.error(error);
         res.status(500).json({ error: 'Error al procesar la solicitud' });
     }
 };
 
+
 export const listarUnTurno = async (req, res) => {
     try {
         const id = req.params.id;
-        const turno = await Turno.findById(id);
+        const turno = await Turno.findById(id).populate('estilista');
 
 
         res.status(200).send(turno);
@@ -69,18 +88,42 @@ export const listarTurnos = async (req, res) => {
 export const editarTurno = async (req, res) => {
     try {
         const id = req.params.id;
-        const { dia, inicioM, finM, inicioT, finT } = req.body;
+        const { estilista, dia, inicioM, finM, inicioT, finT } = req.body;
 
-        const turnoActualizado = {
+        // Convertir las fechas a objetos Date
+        const inicioMDate = new Date(inicioM);
+        const finMDate = new Date(finM);
+        const inicioTDate = new Date(inicioT);
+        const finTDate = new Date(finT);
+
+
+
+        if (inicioMDate >= finMDate) {
+            return res.status(400).json({ error: 'La hora de inicio de la mañana debe ser menor que la hora de fin de la mañana.' });
+        }
+
+        if (finMDate >= inicioTDate) {
+            return res.status(400).json({ error: 'La hora de fin de la mañana debe ser menor que la hora de inicio de la tarde.' });
+        }
+
+        if (finTDate <= inicioTDate || finTDate <= finMDate) {
+            return res.status(400).json({ error: 'La hora de fin de la tarde debe ser mayor que las horas de inicio y fin de la mañana.' });
+        }
+
+        const turno = new Turno({
+            estilista,
             dia,
-            inicioM: moment(inicioM, 'h:mm A').tz('America/Bogota').toDate(),
-            finM: moment(finM, 'h:mm A').tz('America/Bogota').toDate(),
-            inicioT: moment(inicioT, 'h:mm A').tz('America/Bogota').toDate(),
-            finT: moment(finT, 'h:mm A').tz('America/Bogota').toDate(),
-        };
+            inicioM: inicioMDate,
+            finM: finMDate,
+            inicioT: inicioTDate,
+            finT
+        });
 
 
-        const actualizadoTurno = await Turno.findByIdAndUpdate(id, turnoActualizado, { new: true });
+        
+
+
+        const actualizadoTurno = await Turno.findOneAndUpdate({_id:id}, turno, { new: true });
 
         res.status(200).json(actualizadoTurno);
     } catch (error) {
@@ -99,4 +142,46 @@ export const actualizarEstado = async (req, res) => {
         console.log(error)
         return res.status(500).json({ message: error.message })
     }
+}
+
+
+export const intervalos = async(req,res)=>{
+    try {
+        const estilistaId = req.params.id;
+
+        // Convertir el ID del estilista a ObjectId
+        const convertedEstilistaId = new ObjectId(estilistaId);
+
+        // Buscar todos los turnos del estilista
+        const turnos = await Turno.find({ estilista: convertedEstilistaId });
+
+        // Calcular los intervalos de horas
+        
+
+        res.status(200).json(turnos);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error al procesar la solicitud' });
+    }
+}
+
+// Función para calcular los intervalos de horas
+function calcularIntervalos(turnos) {
+    // Puedes ajustar esta función según tus necesidades específicas
+    // Aquí se realiza un cálculo simple de la diferencia entre las horas de inicio y fin de los turnos
+    console.log('Turnos:', turnos);
+    const intervalos = [];
+
+    turnos.forEach(Turno => {
+        const intervaloManana = Turno.finM - Turno.inicioM;
+        const intervaloTarde = Turno.finT - Turno.inicioT;
+
+        intervalos.push({
+            dia: Turno.dia,
+            intervaloManana: intervaloManana,
+            intervaloTarde: intervaloTarde,
+        });
+    });
+
+    return intervalos;
 }
