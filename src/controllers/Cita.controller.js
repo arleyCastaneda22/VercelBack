@@ -21,9 +21,18 @@ export const getCitaById = async (req, res) => {
 
   // Crear una nueva cita
 export const createCita = async (req, res) => {
-    const { fecha, estilista, servicio } = req.body;
+    const { clienteId, servicioId, estilistaId, fechaCita, horaCita} = req.body;
     try {
-      const nuevaCita = new Cita({ fecha, estilista, servicio });
+      
+// No hay citas
+      if(horaCita>=inicioM ){
+        return res.status(404).json({ message: 'Cita no encontrada' });
+        
+      }
+      
+
+
+
       await nuevaCita.save();
       res.json(nuevaCita);
     } catch (error) {

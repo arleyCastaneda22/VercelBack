@@ -120,10 +120,8 @@ export const editarTurno = async (req, res) => {
         });
 
 
-        
 
-
-        const actualizadoTurno = await Turno.findOneAndUpdate({_id:id}, turno, { new: true });
+        const actualizadoTurno = await Turno.findOneAndUpdate(id, turno, { new: true });
 
         res.status(200).json(actualizadoTurno);
     } catch (error) {
@@ -145,43 +143,3 @@ export const actualizarEstado = async (req, res) => {
 }
 
 
-export const intervalos = async(req,res)=>{
-    try {
-        const estilistaId = req.params.id;
-
-        // Convertir el ID del estilista a ObjectId
-        const convertedEstilistaId = new ObjectId(estilistaId);
-
-        // Buscar todos los turnos del estilista
-        const turnos = await Turno.find({ estilista: convertedEstilistaId });
-
-        // Calcular los intervalos de horas
-        
-
-        res.status(200).json(turnos);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Error al procesar la solicitud' });
-    }
-}
-
-// Función para calcular los intervalos de horas
-function calcularIntervalos(turnos) {
-    // Puedes ajustar esta función según tus necesidades específicas
-    // Aquí se realiza un cálculo simple de la diferencia entre las horas de inicio y fin de los turnos
-    console.log('Turnos:', turnos);
-    const intervalos = [];
-
-    turnos.forEach(Turno => {
-        const intervaloManana = Turno.finM - Turno.inicioM;
-        const intervaloTarde = Turno.finT - Turno.inicioT;
-
-        intervalos.push({
-            dia: Turno.dia,
-            intervaloManana: intervaloManana,
-            intervaloTarde: intervaloTarde,
-        });
-    });
-
-    return intervalos;
-}
