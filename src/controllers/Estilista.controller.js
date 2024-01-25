@@ -1,5 +1,6 @@
 
 import Estilista from'../models/Estilista.js'
+import Servicio from '../models/Servicio.js'
 import { Role } from '../models/Role.js' 
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
@@ -62,7 +63,7 @@ export const createEstilista = async (req, res) => {
 
 export const listarEstilista= async(req, res)=>{
     try {
-        const estilista= await Estilista.find();
+        const estilista= await Estilista.find()
          return res.status(200).json(estilista)
     } catch (error) {
         console.log(error)
@@ -166,6 +167,7 @@ export const actualizarEstado=async(req,res)=>{
         return res.status(500).json({message: error.message})
     }
 }
+
 
 
 
