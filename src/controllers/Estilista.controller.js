@@ -119,27 +119,42 @@ export const editarEstilista=async(req,res)=>{
         }
     };
 
-export const actualizarContraseña = async (req, res) => {
-    const { id, token } = req.params;
-    const { contrasena } = req.body;
-
-    try {
-        // Verificar el token
-        jwt.verify(token, 'secreto');
-
-        // Hash de la nueva contraseña
-        const hashedPassword = await bcrypt.hash(contrasena, 10);
-
-        // Actualizar la contraseña del usuario
-        await User.findByIdAndUpdate(id, { $set: { contrasena: hashedPassword } });
-
-        res.status(204).json({ mensaje: 'Contraseña actualizada con éxito' });
-
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: 'Error de servidor' });
-    }
-};
+    export const actualizarContraseña = async (req, res) => {
+        const { id } = req.params;
+        const { oldcontrasena, newcontrasena } = req.body;
+    
+        try {
+            let Estilista = await Estilista.findOne({ _id: id });
+        
+            if (!Estilista) {
+                return res.status(404).json({ error: 'Usuario no encontrado' });
+            }
+    
+            console.log('ID del usuario:', id);
+            console.log('Contraseña antigua:', oldcontrasena);
+            console.log('Nueva contraseña:', newcontrasena);
+    
+    
+            const contrasenaValida = await bcrypt.compare(oldcontrasena, usuario.contrasena);
+    
+            if (!contrasenaValida) {
+                console.log("no paso la prueba")
+                return res.status(401).json({ error: 'La contraseña antigua no es válida' });
+            }else{
+                // Hash de la nueva contraseña
+                const hashedPassword = await bcrypt.hash(newcontrasena, 10);
+                
+                // Actualizar la contraseña del usuario
+                await Estilista.findByIdAndUpdate(id, { $set: { contrasena: hashedPassword } });
+                console.log("siiiiiiiiiiiiiiiii")
+                res.status(204).json({ mensaje: 'Contraseña actualizada con éxito' });
+            }
+            
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ error: 'Error de al acttualizar la contraseña ' });
+        }
+    };
 
 export const eliminarEstilista=async(req,res)=>{
     try {
