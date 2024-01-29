@@ -1,6 +1,5 @@
 
 import Estilista from'../models/Estilista.js'
-import Servicio from '../models/Servicio.js'
 import { Role } from '../models/Role.js' 
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
@@ -104,7 +103,7 @@ export const editarEstilista=async(req,res)=>{
             await Estilista.findByIdAndUpdate(id, { contrasena: hashedPassword, email, nombre, apellido, roles});
         } else {
             // Si no se proporcionó una nueva contraseña, actualizar otros datos solamente
-            await User.findByIdAndUpdate(id, { email, nombre, apellido, roles });
+            await Estilista.findByIdAndUpdate(id, { email, nombre, apellido, roles });
         }
 
         res.status(204).json({ mensaje: 'Usuario actualizado con éxito' });
@@ -124,10 +123,10 @@ export const editarEstilista=async(req,res)=>{
         const { oldcontrasena, newcontrasena } = req.body;
     
         try {
-            let Estilista = await Estilista.findOne({ _id: id });
+            let estilista = await Estilista.findOne({ _id: id });
         
-            if (!Estilista) {
-                return res.status(404).json({ error: 'Usuario no encontrado' });
+            if (!estilista) {
+                return res.status(404).json({ error: 'Estilista no encontrado' });
             }
     
             console.log('ID del usuario:', id);
@@ -135,7 +134,7 @@ export const editarEstilista=async(req,res)=>{
             console.log('Nueva contraseña:', newcontrasena);
     
     
-            const contrasenaValida = await bcrypt.compare(oldcontrasena, usuario.contrasena);
+            const contrasenaValida = await bcrypt.compare(oldcontrasena, estilista.contrasena);
     
             if (!contrasenaValida) {
                 console.log("no paso la prueba")
