@@ -1,74 +1,99 @@
-import Cita from '../models/Cita.js'
 
-export const getCitas = async (req, res) => {
-    try {
-      const citas = await Cita.find();
-      res.json(citas);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  };
+import Cita from '../models/Cita.js';
+import Turno from '../models/Turnos.js';
 
-  // Obtener una cita por ID
-export const getCitaById = async (req, res) => {
-    try {
-      const cita = await Cita.findById(req.params.id);
-      res.json(cita);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  };
 
-  // Crear una nueva cita
 export const createCita = async (req, res) => {
-    const { clienteId, servicioId, estilistaId, fechaCita, horaCita} = req.body;
-    try {
-      
-// No hay citas
-      if(horaCita>=inicioM ){
-        return res.status(404).json({ message: 'Cita no encontrada' });
-        
-      }
-      
+  try {
+    const { cliente, servicio, estilista, fechaCita, horaCita } = req.body;
 
+    const fechaCitaNormalizada = new Date(fechaCita);
+    const horaCitaNormalizada = new Date(horaCita);
 
+    fechaCitaNormalizada.setMilliseconds(0);
+    horaCitaNormalizada.setMilliseconds(0);
 
-      await nuevaCita.save();
-      res.json(nuevaCita);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+    const diaSemana = obtenerDiaSemana(fechaCitaNormalizada.getDay());
+    const turno = await Turno.findOne({ estilista, dia: diaSemana });
+
+    if (!turno) {
+      return res.status(400).json({ error: 'El estilista no tiene turno disponible para este día.' });
     }
-  };
 
-  // Actualizar una cita por ID
-export const updateCita = async (req, res) => {
-    const { fecha, estilista, servicio } = req.body;
-    try {
-      const cita = await Cita.findById(req.params.id);
-      if (!cita) {
-        return res.status(404).json({ message: 'Cita no encontrada' });
-      }
-      cita.fecha = fecha;
-      cita.estilista = estilista;
-      cita.servicio = servicio;
-      await cita.save();
-      res.json(cita);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+    const { inicioM, finM, inicioT, finT } = turno;
+
+    if (
+      !(horaCitaNormalizada >= new Date(inicioM) && horaCitaNormalizada <= new Date(finM)) &&
+      !(horaCitaNormalizada >= new Date(inicioT) && horaCitaNormalizada <= new Date(finT))
+    ) {
+      return res.status(400).json({ error: 'La hora de la cita está fuera del rango de trabajo del estilista.' });
     }
-  };
 
+    // Verificar si ya existe una cita para el estilista en la misma fecha y hora
+    const existingCita = await Cita.findOne({
+      estilista,
+      fechaCita: fechaCitaNormalizada,
+      horaCita: horaCitaNormalizada,
+    });
 
-  // Eliminar una cita por ID
-export const deleteCita = async (req, res) => {
-    try {
-      const cita = await Cita.findById(req.params.id);
-      if (!cita) {
-        return res.status(404).json({ message: 'Cita no encontrada' });
-      }
-      await cita.remove();
-      res.json({ message: 'Cita eliminada con éxito' });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+    if (existingCita) {
+      return res.status(400).json({ error: 'Ya existe una cita para el estilista en la misma fecha y hora.' });
     }
-  };
+
+    const cita = new Cita({
+      cliente,
+      servicio,
+      estilista,
+      fechaCita: fechaCitaNormalizada,
+      horaCita: horaCitaNormalizada,
+      turno: turno._id,
+    });
+
+    const citaSave = await cita.save();
+
+    res.status(201).json({
+      message: 'Cita creada exitosamente',
+      cita: {
+        cliente: citaSave.cliente,
+        servicio: citaSave.servicio,
+        estilista: citaSave.estilista,
+        fechaCita: citaSave.fechaCita,
+        horaCita: citaSave.horaCita,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al procesar la solicitud' });
+  }
+};
+
+function obtenerDiaSemana(dia) {
+  const diasSemana = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+  return diasSemana[dia];
+}
+
+
+
+
+export const listarCita = async (req, res) => {
+  try {
+    const citas = await Cita.find()
+      .populate({
+        path: 'cliente',
+        model: 'User'
+      })
+      .populate({
+        path: 'servicio',
+        model: 'Servicio'
+      })
+      .populate({
+        path: 'estilista',
+        model: 'Estilista'
+      });
+
+    res.status(200).json(citas);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: error.message });
+  }
+};

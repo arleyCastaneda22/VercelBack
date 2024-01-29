@@ -3,10 +3,11 @@ import { Schema, model } from "mongoose";
 const citaSchema = new Schema({
     cliente:{
         type:Schema.Types.ObjectId,
-        ref:'Cliente'
+        ref:'User'
+        
     },
 
-    Servicio:{
+    servicio:{
         type:Schema.Types.ObjectId,
         ref:'Servicio'
     },
@@ -27,7 +28,11 @@ const citaSchema = new Schema({
     estado: {
         type: Boolean,
         default: true
-    }
+    },
+    turno: {
+        type: Schema.Types.ObjectId,
+        ref: 'Turno'
+    },
 }, {
     timestamps: true,
     versionKey: false
