@@ -9,6 +9,8 @@ router.post('/turnos', createTurnos)
     .get('/turnos/edit/:id', listarUnTurno)
 
     .get('/turnos/estado/:id', actualizarEstado)
+
+    
     
     .put('/turnos/:id', editarTurno)
 

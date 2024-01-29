@@ -1,5 +1,5 @@
 import Router from 'express'
-import { createServicio, listarServicio, editarServicio, eliminarServicio, listarUnServicio, actualizarEstado} from '../controllers/Servicio.controller.js'
+import { createServicio, listarServicio, editarServicio, eliminarServicio, listarUnServicio, actualizarEstado, estilistaPorServicio} from '../controllers/Servicio.controller.js'
 
 const router = Router()
 
@@ -14,6 +14,8 @@ router.get('/servicios', listarServicio)
     .put('/servicios/:id', editarServicio )
     
     .delete('/servicios/:id', eliminarServicio )
+
+    .get('/servicios/:servicioId/estilista', estilistaPorServicio)
 
 
 export default router;

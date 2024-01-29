@@ -1,4 +1,5 @@
 import Servicio from '../models/Servicio.js'
+import Estilista from '../models/Estilista.js'
 import fs from 'fs';
 
 
@@ -79,6 +80,33 @@ export const actualizarEstado=async(req,res)=>{
     } catch (error) {
         console.log(error)
         return res.status(500).json({message: error.message})
+    }
+}
+
+export const estilistaPorServicio =async(req, res)=>{
+    try {
+        const servicioId = req.params.servicioId;
+
+        
+        const servicio = await Servicio.findById(servicioId).populate('estilista');
+
+        if (!servicio) {
+            
+            return res.status(404).json({ message: 'Servicio no encontrado' });
+        }
+
+        // Obtiene el estilista asociado al servicio
+        const estilista = servicio.estilista;
+
+        if (!estilista) {
+            
+            return res.status(404).json({ message: 'Estilista no encontrado' });
+        }
+
+        res.status(200).json(estilista);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error interno del servidor' });
     }
 }
 

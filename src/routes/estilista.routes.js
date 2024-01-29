@@ -1,5 +1,5 @@
 import Router from 'express'
-import { createEstilista, listarEstilista, listarUnEstilista, editarEstilista, eliminarEstilista, actualizarEstado, actualizarContraseña } from '../controllers/Estilista.controller.js'
+import { createEstilista, listarEstilista, listarUnEstilista, editarEstilista, eliminarEstilista, actualizarEstado, actualizarContraseña} from '../controllers/Estilista.controller.js'
 
 const router = Router();
 
@@ -16,6 +16,8 @@ router.get('/estilistas', listarEstilista)
     .get('/estilistas/estado/:id', actualizarEstado)
 
     .delete('/estilistas/:id', eliminarEstilista)
+
+    
 
 export default router;
 

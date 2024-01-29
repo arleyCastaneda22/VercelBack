@@ -7,7 +7,8 @@ const turnoSchema = new Schema({
     },
     dia: {
         type: String,
-        required: true
+        required: true,
+        enum: ['L', 'M', 'X', 'J', 'V', 'S', 'D'],
     },
     inicioM: {
         type: Date,
