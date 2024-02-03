@@ -14,18 +14,7 @@ export const createTurnos = async (req, res) => {
         const inicioTDate = new Date(inicioT);
         const finTDate = new Date(finT);
 
-        // // Sumar minutos a las fechas
-        // const minutosAsumar = 30; // Puedes ajustar el número de minutos según tus necesidades
-        // inicioMDate.setMinutes(inicioMDate.getMinutes() + minutosAsumar);
-        // finMDate.setMinutes(finMDate.getMinutes() + minutosAsumar);
-        // inicioTDate.setMinutes(inicioTDate.getMinutes() + minutosAsumar);
-        // finTDate.setMinutes(finTDate.getMinutes() + minutosAsumar);
-
-
-        // console.log('Inicio M:', inicioMDate);
-        // console.log('Fin M:', finMDate);
-        // console.log('Inicio T:', inicioTDate);
-        // console.log('Fin T:', finTDate);
+   
 
         // Verificar si ya existe un turno para el mismo estilista en el mismo día
         const existingTurno = await Turno.findOne({ estilista, dia });
