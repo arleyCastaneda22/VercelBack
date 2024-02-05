@@ -172,3 +172,30 @@ export const eliminarCita=async(req,res)=>{
       return res.status(500).json({message: error.message})
   }
 }
+
+
+export const actualizarEstadoCita = async (req, res) => {
+  try {
+    const citaId = req.params.id;
+    const nuevoEstado = req.body.estado;
+
+    // Realiza la lógica para actualizar el estado en la base de datos
+    const citaActualizada = await Cita.findByIdAndUpdate(citaId, { estado: nuevoEstado }, { new: true });
+
+    if (!citaActualizada) {
+      return res.status(404).json({ error: 'Cita no encontrada' });
+    }
+
+    // Verifica si el nuevo estado es uno de los estados válidos
+    if (!['confirmada', 'cancelada', 'en espera', 'pendiente'].includes(nuevoEstado)) {
+      return res.status(400).json({ error: 'Estado no válido' });
+    }
+
+
+
+    res.status(200).json({ message: 'Estado de la cita actualizado exitosamente' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al procesar la solicitud' });
+  }
+};
