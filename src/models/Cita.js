@@ -26,8 +26,9 @@ const citaSchema = new Schema({
         required: true,
     },
     estado: {
-        type: Boolean,
-        default: true
+        type: String,
+        enum: ['confirmada', 'cancelada', 'en espera', 'pendiente'],
+        default: 'pendiente',
     },
     turno: {
         type: Schema.Types.ObjectId,

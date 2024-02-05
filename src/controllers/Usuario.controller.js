@@ -58,24 +58,39 @@ export const editarUsuario = async (req, res) => {
 };
 
 export const actualizarContraseña = async (req, res) => {
-    const { id, token } = req.params;
-    const { contrasena } = req.body;
+    const { id } = req.params;
+    const { oldcontrasena, newcontrasena } = req.body;
 
     try {
-        // Verificar el token
-        jwt.verify(token, 'secreto');
+        let usuario = await User.findOne({ _id: id });
+    
+        if (!usuario) {
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        }
 
-        // Hash de la nueva contraseña
-        const hashedPassword = await bcrypt.hash(contrasena, 10);
+        console.log('ID del usuario:', id);
+        console.log('Contraseña antigua:', oldcontrasena);
+        console.log('Nueva contraseña:', newcontrasena);
 
-        // Actualizar la contraseña del usuario
-        await User.findByIdAndUpdate(id, { $set: { contrasena: hashedPassword } });
 
-        res.status(204).json({ mensaje: 'Contraseña actualizada con éxito' });
+        const contrasenaValida = await bcrypt.compare(oldcontrasena, usuario.contrasena);
 
+        if (!contrasenaValida) {
+            console.log("no paso la prueba")
+            return res.status(401).json({ error: 'La contraseña antigua no es válida' });
+        }else{
+            // Hash de la nueva contraseña
+            const hashedPassword = await bcrypt.hash(newcontrasena, 10);
+            
+            // Actualizar la contraseña del usuario
+            await User.findByIdAndUpdate(id, { $set: { contrasena: hashedPassword } });
+            console.log("siiiiiiiiiiiiiiiii")
+            res.status(204).json({ mensaje: 'Contraseña actualizada con éxito' });
+        }
+        
     } catch (error) {
         console.log(error);
-        res.status(500).json({ error: 'Error de servidor' });
+        res.status(500).json({ error: 'Error de al acttualizar la contraseña ' });
     }
 };
 
@@ -104,3 +119,4 @@ export const actualizarEstado=async(req,res)=>{
         return res.status(500).json({message: error.message})
     }
 }
+

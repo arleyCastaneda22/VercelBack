@@ -64,15 +64,16 @@ estilistaSchema.pre("save", async function(next){
 });
 
 // Método para comparar contraseñas
-estilistaSchema.methods.comparePassword = async function(candidatePassword){
+
+  estilistaSchema.methods.comparePassword = async function (candidatePassword) {
     try {
-        console.log('compareE', candidatePassword, 'contrasenaE', this.contrasena)
-        return await bcrypt.compare(candidatePassword, this.contrasena);
-      } catch (error) {
-        console.error(error);
-        throw new Error('Error al comparar contraseñas');
-      }
-    };
+      console.log('compareU', candidatePassword, 'contrasenaU', this.contrasena)
+      return await bcrypt.compare(candidatePassword, this.contrasena);
+    } catch (error) {
+      console.error(error);
+      throw new Error('Error al comparar contraseñas');
+    }
+  };
 
 export default model('Estilista', estilistaSchema)
 

@@ -279,6 +279,35 @@ export const actualizarContraseña = async (req, res) => {
       console.error(error);
       res.status(500).json({ error: 'Error de servidor' });
     }
+
+    
+  };
+
+
+  export const verificarContrasena = async (req, res) => {
+    const { id } = req.params;
+    const { oldContrasena } = req.body;
+  
+    try {
+      let usuario = await User.findOne({ _id: id });
+  
+      if (!usuario) {
+        return res.status(404).json({ error: 'Usuario no encontrado' });
+      }
+  
+      // Verificar la contraseña antigua
+      const contrasenaValida = await bcrypt.compare(oldContrasena, usuario.contrasena);
+  
+      if (!contrasenaValida) {
+        return res.status(401).json({ error: 'La contraseña antigua no es válida' });
+      }
+  
+      // La contraseña antigua es válida
+      return res.status(200).json({ mensaje: 'La contraseña antigua es válida' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error de servidor' });
+    }
   };
   
 

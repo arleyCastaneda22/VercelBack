@@ -1,6 +1,5 @@
 
 import Estilista from'../models/Estilista.js'
-import Servicio from '../models/Servicio.js'
 import { Role } from '../models/Role.js' 
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
@@ -104,7 +103,7 @@ export const editarEstilista=async(req,res)=>{
             await Estilista.findByIdAndUpdate(id, { contrasena: hashedPassword, email, nombre, apellido, roles});
         } else {
             // Si no se proporcionó una nueva contraseña, actualizar otros datos solamente
-            await User.findByIdAndUpdate(id, { email, nombre, apellido, roles });
+            await Estilista.findByIdAndUpdate(id, { email, nombre, apellido, roles });
         }
 
         res.status(204).json({ mensaje: 'Usuario actualizado con éxito' });
@@ -119,27 +118,42 @@ export const editarEstilista=async(req,res)=>{
         }
     };
 
-export const actualizarContraseña = async (req, res) => {
-    const { id, token } = req.params;
-    const { contrasena } = req.body;
-
-    try {
-        // Verificar el token
-        jwt.verify(token, 'secreto');
-
-        // Hash de la nueva contraseña
-        const hashedPassword = await bcrypt.hash(contrasena, 10);
-
-        // Actualizar la contraseña del usuario
-        await User.findByIdAndUpdate(id, { $set: { contrasena: hashedPassword } });
-
-        res.status(204).json({ mensaje: 'Contraseña actualizada con éxito' });
-
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: 'Error de servidor' });
-    }
-};
+    export const actualizarContraseña = async (req, res) => {
+        const { id } = req.params;
+        const { oldcontrasena, newcontrasena } = req.body;
+    
+        try {
+            let estilista = await Estilista.findOne({ _id: id });
+        
+            if (!estilista) {
+                return res.status(404).json({ error: 'Estilista no encontrado' });
+            }
+    
+            console.log('ID del usuario:', id);
+            console.log('Contraseña antigua:', oldcontrasena);
+            console.log('Nueva contraseña:', newcontrasena);
+    
+    
+            const contrasenaValida = await bcrypt.compare(oldcontrasena, estilista.contrasena);
+    
+            if (!contrasenaValida) {
+                console.log("no paso la prueba")
+                return res.status(401).json({ error: 'La contraseña antigua no es válida' });
+            }else{
+                // Hash de la nueva contraseña
+                const hashedPassword = await bcrypt.hash(newcontrasena, 10);
+                
+                // Actualizar la contraseña del usuario
+                await Estilista.findByIdAndUpdate(id, { $set: { contrasena: hashedPassword } });
+                console.log("siiiiiiiiiiiiiiiii")
+                res.status(204).json({ mensaje: 'Contraseña actualizada con éxito' });
+            }
+            
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ error: 'Error de al acttualizar la contraseña ' });
+        }
+    };
 
 export const eliminarEstilista=async(req,res)=>{
     try {
