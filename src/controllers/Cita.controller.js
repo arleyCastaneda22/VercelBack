@@ -1,6 +1,7 @@
 
 import Cita from '../models/Cita.js';
 import Turno from '../models/Turnos.js';
+
 export const createCita = async (req, res) => {
   try {
     const { cliente, servicio, estilista, fechaCita, horaCita } = req.body;
@@ -11,17 +12,24 @@ export const createCita = async (req, res) => {
     fechaCitaNormalizada.setMilliseconds(0);
     horaCitaNormalizada.setMilliseconds(0);
 
+    const serdura = servicio.duracionCita
+    
     const duracionCita = 60 * 60 * 1000; // Duración en milisegundos (1 hora)
     const horaFinCitaNormalizada = new Date(horaCitaNormalizada.getTime() + duracionCita);
 
+    
+    
     // Ajustar las fechas a la precisión de minutos
     fechaCitaNormalizada.setSeconds(0, 0);
     horaCitaNormalizada.setSeconds(0, 0);
     horaFinCitaNormalizada.setSeconds(0, 0);
-
-
-
+    
+    console.log('horaCitaNormalizada', horaCitaNormalizada)
+    console.log('horaFinCitaNormalizada', horaFinCitaNormalizada)
+    
+    
     const diaSemana = obtenerDiaSemana(fechaCitaNormalizada.getDay());
+    console.log(diaSemana)
     const turno = await Turno.findOne({ estilista, dia: diaSemana });
 
     if (!turno) {
@@ -35,10 +43,15 @@ export const createCita = async (req, res) => {
     finM.setSeconds(0, 0);
     inicioT.setSeconds(0, 0);
     finT.setSeconds(0, 0);
-
+    
+        console.log(inicioM)
+        console.log(finM)
+        console.log(inicioT)
+        console.log(finT)
+    
     if (
-      !(horaCitaNormalizada >= inicioM && horaFinCitaNormalizada <= finM) &&
-      !(horaCitaNormalizada >= inicioT && horaFinCitaNormalizada <= finT)
+      (horaCitaNormalizada >= inicioM && horaFinCitaNormalizada <= finM) ||
+      (horaCitaNormalizada >= inicioT && horaFinCitaNormalizada <= finT)
     ) {
       return res.status(400).json({ error: 'La hora de la cita está fuera del rango de trabajo del estilista.' });
     }
