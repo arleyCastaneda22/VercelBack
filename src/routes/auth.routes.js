@@ -41,7 +41,7 @@ router.post("/login",[
 
 router.post("/forgot-password", recuperarContraseña)
 
-router.put('/cambio/:id/',actualizarContraseña )
+router.put('/cambio/:id/:token',actualizarContraseña )
 
 router.post('/:id/verificar-contrasena', verificarContrasena);
 
