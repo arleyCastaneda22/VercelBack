@@ -4,7 +4,7 @@ const ventasSchema = new Schema({
 
     cliente: {
         type: Schema.Types.ObjectId,  // Tipo de referencia ObjectId
-        ref: 'Cliente',  // Nombre del modelo a referenciar
+        ref: 'User',  // Nombre del modelo a referenciar
         required: true
     },
     servicio: {
@@ -16,10 +16,7 @@ const ventasSchema = new Schema({
         type:String,
         required:true
     },
-    estado: {
-        type: Boolean,
-        default: false
-    },
+
 },{
     timestamps:true,
     versionKey:false

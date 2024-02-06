@@ -86,7 +86,7 @@ export const listarUnEstilista=async(req,res)=>{
 
 export const editarEstilista=async(req,res)=>{
     const id=req.params.id;
-    const { email, nombre, apellido, contrasena, roles  } = req.body;
+    const { email, nombre, apellido,telefono, contrasena, roles  } = req.body;
     try {
 
         const existingEstilista = await Estilista.findOne({ email, _id: { $ne: id } });
@@ -100,10 +100,10 @@ export const editarEstilista=async(req,res)=>{
             // Hash de la nueva contraseña
             const hashedPassword = await bcrypt.hash(contrasena, 10);
             // Actualizar la contraseña del usuario
-            await Estilista.findByIdAndUpdate(id, { contrasena: hashedPassword, email, nombre, apellido, roles});
+            await Estilista.findByIdAndUpdate(id, { contrasena: hashedPassword, email, nombre, apellido, telefono, roles});
         } else {
             // Si no se proporcionó una nueva contraseña, actualizar otros datos solamente
-            await Estilista.findByIdAndUpdate(id, { email, nombre, apellido, roles });
+            await Estilista.findByIdAndUpdate(id, { email, nombre, apellido,telefono,roles });
         }
 
         res.status(204).json({ mensaje: 'Usuario actualizado con éxito' });

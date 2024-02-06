@@ -14,6 +14,8 @@ export const createTurnos = async (req, res) => {
         const inicioTDate = new Date(inicioT);
         const finTDate = new Date(finT);
 
+      
+
    
 
         // Verificar si ya existe un turno para el mismo estilista en el mismo día

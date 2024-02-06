@@ -25,7 +25,7 @@ export const listarUnUsuario=async(req,res)=>{
 
 export const editarUsuario = async (req, res) => {
     const id = req.params.id;
-    const { email, nombre, apellido, contrasena, roles  } = req.body;
+    const { email, nombre, apellido,telefono, direccion, contrasena, roles  } = req.body;
     try {
 
         const existingUser = await User.findOne({ email, _id: { $ne: id } });
@@ -41,7 +41,7 @@ export const editarUsuario = async (req, res) => {
             await User.findByIdAndUpdate(id, { contrasena: hashedPassword, email, nombre, apellido, roles});
         } else {
             // Si no se proporcionó una nueva contraseña, actualizar otros datos solamente
-            await User.findByIdAndUpdate(id, { email, nombre, apellido, roles });
+            await User.findByIdAndUpdate(id, { email, nombre, apellido, telefono, direccion, roles });
         }
 
         res.status(204).json({ mensaje: 'Usuario actualizado con éxito' });

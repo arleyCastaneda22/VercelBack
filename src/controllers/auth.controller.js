@@ -10,7 +10,7 @@ import jwt from 'jsonwebtoken'
 
 
 export const register = async (req, res) => {
-    const { email, nombre, apellido, contrasena, roles } = req.body;
+    const { email, nombre, apellido,telefono, direccion, contrasena, roles } = req.body;
 
     try {
         // Verifica si el usuario existe
@@ -22,7 +22,7 @@ export const register = async (req, res) => {
         }
 
         // Si no existe, crea un nuevo usuario (objeto)
-        user = new User({ email, nombre, apellido, contrasena });
+        user = new User({ email, nombre, apellido,telefono, direccion, contrasena });
 
         // Verifica y asigna los roles
         if (roles && roles.length > 0) {
