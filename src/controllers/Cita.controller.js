@@ -39,7 +39,7 @@ export const createCita = async (req, res) => {
 
 
     const diaSemana = obtenerDiaSemana(fechaCitaNormalizada.getDay());
-    console.log(diaSemana)
+    console.log("dia de la semana del turno:",diaSemana.toLocaleString())
     const turno = await Turno.findOne({ estilista, dia: diaSemana });
 
     if (!turno) {
@@ -48,10 +48,7 @@ export const createCita = async (req, res) => {
 
     const { inicioM, finM, inicioT, finT } = turno;
 
-    console.log('inicio del turno MAÑANA:', inicioM.toLocaleString());
-    console.log('fin del Turno MAÑANA:', finM.toLocaleString());
-    console.log('inicio del turno TARDE:', inicioT.toLocaleString());
-    console.log('fin del Turno TARDE:', finT.toLocaleString());
+
     console.log('Fecha y hora de la CITA:', horaCitaNormalizada.toLocaleString());
     console.log('Fecha y hora de FIN de la cita:', horaFinCitaNormalizada.toLocaleString());
     console.log('Duracion del servicio:', horaFinCita.toLocaleString());
@@ -64,10 +61,10 @@ export const createCita = async (req, res) => {
     inicioT.setSeconds(0, 0);
     finT.setSeconds(0, 0);
     
-        console.log(inicioM)
-        console.log(finM)
-        console.log(inicioT)
-        console.log(finT)
+    console.log('inicio del turno MAÑANA:\n', inicioM.toLocaleString());
+    console.log('fin del Turno MAÑANA:', finM.toLocaleString());
+    console.log('inicio del turno TARDE:', inicioT.toLocaleString());
+    console.log('fin del Turno TARDE:', finT.toLocaleString());
     
     if (
       (horaCitaNormalizada >= inicioM && horaFinCitaNormalizada <= finM) ||
