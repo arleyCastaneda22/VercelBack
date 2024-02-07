@@ -67,8 +67,8 @@ export const createCita = async (req, res) => {
     console.log('fin del Turno TARDE:', finT.toLocaleString());
     
     if (
-      (horaCitaNormalizada >= inicioM && horaFinCitaNormalizada <= finM) ||
-      (horaCitaNormalizada >= inicioT && horaFinCitaNormalizada <= finT)
+      !(horaCitaNormalizada >= inicioM && horaFinCitaNormalizada <= finM) &&
+      !(horaCitaNormalizada >= inicioT && horaFinCitaNormalizada <= finT)
     ) {
       return res.status(400).json({ error: 'La hora de la cita está fuera del rango de trabajo del estilista.' });
     }
