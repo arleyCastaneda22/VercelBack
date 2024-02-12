@@ -2,6 +2,7 @@
 import Cita from '../models/Cita.js';
 import Servicio from '../models/Servicio.js'
 import Turno from '../models/Turnos.js';
+import Cliente from '../models/Cliente.js';
 
 
 
@@ -350,20 +351,20 @@ export const actualizarEstadoCita = async (req, res) => {
   }
 };
 
-export const CitaPorEstilista  = async (req, res) => {
-
-
+export const CitaPorEstilista = async (req, res) => {
   try {
-
     const estilistaId = req.params.estilistaId;
 
     // Realiza la consulta en la base de datos para obtener citas por estilista
-    const citasPorEstilista = await Cita.find({ estilista: estilistaId });
+    const citasPorEstilista = await Cita.find({ estilista: estilistaId })
+      .populate('estilista')
+      .populate('cliente')  // Cargar información completa del cliente
+      .populate('servicio'); // Cargar información completa del servicio
 
-    res.json(citasPorEstilista)
+    res.json(citasPorEstilista);
 
-  }catch (error) {
+  } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error al procesar la solicitud' });
   }
-}
+};
