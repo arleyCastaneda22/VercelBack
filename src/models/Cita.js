@@ -39,5 +39,8 @@ const citaSchema = new Schema({
     versionKey: false
 });
 
+// Agrega el índice compuesto
+citaSchema.index({ estilista: 1, fechaCita: 1, horaCita: 1, servicio: 1 }, { unique: true });
+
 export default model('Cita', citaSchema);
 
