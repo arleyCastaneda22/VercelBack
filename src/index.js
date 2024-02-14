@@ -1,5 +1,5 @@
 import "dotenv/config";
-import express from 'express';
+import express, { Router } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import morgan from "morgan";
@@ -14,6 +14,7 @@ import UsuarioRouter from './routes/usuario.routes.js'
 import RoleRouter from './routes/role.routes.js'
 import ventasRouter from './routes/ventas.routes.js'
 import CitaRouter from './routes/cita.routes.js'
+import dashboardRouter from './routes/dashboard.routes.js'
 
 // Database connection
 import('./database/database.js');
@@ -43,6 +44,8 @@ app.use('/api', TurnosRouter)
 app.use('/api',RoleRouter)
 app.use('/api', ventasRouter)
 app.use('/api', CitaRouter)
+app.use('/api', dashboardRouter)
+
 
 // Routes
 // app.use('/api', routes);
