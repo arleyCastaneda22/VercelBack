@@ -313,6 +313,26 @@ export const listarCita = async (req, res) => {
 };
 
 
+export const listarUnaCita=async(req,res)=>{
+  try {
+      const id = req.params.id;
+      const cita = await Cita.findById(id)
+      .populate('estilista')
+      .populate('cliente')
+      .populate('servicio')
+
+      console.log('Cita encontrada:', cita);
+
+
+      res.status(200).send(cita)
+  } catch (error) {
+      console.log(error)
+      return res.status(500).json({message: error.message})
+  }
+}
+
+
+
 export const eliminarCita=async(req,res)=>{
   try {
       const id =req.params.id;
@@ -363,6 +383,237 @@ export const CitaPorEstilista = async (req, res) => {
 
     res.json(citasPorEstilista);
 
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al procesar la solicitud' });
+  }
+};
+
+export const listarUsuarios = async(req, res)=>{
+  try {
+      const user= await User.find().populate('roles','nombre');
+      res.status(200).json(user)
+  } catch (error) {
+      console.log(error)
+      return res.status(500).json({message: error.message})
+  }
+}
+
+export const editarCita = async (req, res) => {
+  try {
+    const id=req.params.id;
+    const { cliente, servicio, estilista, fechaCita, horaCita } = req.body;
+    
+    const fechaCitaNormalizada = new Date(fechaCita);
+    const horaCitaNormalizada = new Date(horaCita);
+    const now = new Date(); // Obtener la fecha y hora actual
+    
+    fechaCitaNormalizada.setMilliseconds(0);
+    horaCitaNormalizada.setMilliseconds(0);
+    
+    // Obtén la duración del servicio desde la base de datos (puedes necesitar ajustar esto según tu modelo)
+    const duracionServicio = await Servicio.findById(servicio).select('duracion').exec();
+
+    // const duracionCita = 60 * 60 * 1000; // Duración en milisegundos (1 hora)
+    const duracionCita = duracionServicio.duracion * 60 * 1000;
+    const horaFinCitaNormalizada = new Date(horaCitaNormalizada.getTime() + duracionCita);
+
+    
+    
+    // Ajustar las fechas a la precisión de minutos
+    fechaCitaNormalizada.setSeconds(0, 0);
+    horaCitaNormalizada.setSeconds(0, 0);
+    horaFinCitaNormalizada.setSeconds(0, 0);
+
+
+    // Calcula la hora de finalización de la cita sumando la duración del servicio
+    const horaFinCita = new Date(horaCitaNormalizada.getTime() + duracionServicio.duracion);
+
+    const diaSemana = obtenerDiaSemana(fechaCitaNormalizada.getDay());
+
+    // console.log("\ndia de la semana del turno:",diaSemana.toLocaleString())
+
+    const turno = await Turno.findOne({ estilista, dia: diaSemana });
+
+    if (!turno) {
+      return res.status(400).json({ error: 'El estilista no tiene turno disponible para este día.' });
+    }
+
+    if (fechaCitaNormalizada < now) {
+      return res.status(400).json({ error: 'La fecha de la cita debe ser en el futuro.' });
+    }
+
+    const { inicioM, finM, inicioT, finT } = turno;
+
+    const inicioMToday = new Date(now); // Crear una nueva fecha basada en la actual
+    inicioMToday.setHours(inicioM.getHours(), inicioM.getMinutes(), 0, 0);
+
+    const finMToday = new Date(now);
+    finMToday.setHours(finM.getHours(), finM.getMinutes(), 0, 0);
+
+    const inicioTToday = new Date(now);
+    inicioTToday.setHours(inicioT.getHours(), inicioT.getMinutes(), 0, 0);
+
+    const finTToday = new Date(now);
+    finTToday.setHours(finT.getHours(), finT.getMinutes(), 0, 0);
+
+    console.log('Inicio del turno MAÑANA:', inicioMToday.toLocaleString());
+    console.log('Fin del Turno MAÑANA:', finMToday.toLocaleString());
+    console.log('Inicio del turno TARDE:', inicioTToday.toLocaleString());
+    console.log('Fin del Turno TARDE:', finTToday.toLocaleString());
+
+    console.log('Fecha y hora de inicio:', horaCitaNormalizada.toLocaleString());
+    console.log('Fecha y hora de finalizacion:', horaFinCitaNormalizada.toLocaleString());
+    console.log('Duracion del servicio:', duracionServicio.duracion.toLocaleString());
+
+    console.log(horaCitaNormalizada >= inicioM && horaFinCitaNormalizada <= finM)
+    console.log(horaCitaNormalizada >= inicioT && horaFinCitaNormalizada <= finT)
+
+    // Ajustar las fechas a la precisión de minutos
+    inicioM.setSeconds(0, 0);
+    finM.setSeconds(0, 0);
+    inicioT.setSeconds(0, 0);
+    finT.setSeconds(0, 0);
+    
+
+
+    if (
+      !(horaCitaNormalizada >= inicioMToday && horaFinCitaNormalizada <= finMToday) &&
+      !(horaCitaNormalizada >= inicioTToday && horaFinCitaNormalizada <= finTToday)
+    ) {
+      return res.status(400).json({ error: 'La hora de la cita está fuera del rango de trabajo del estilista.' });
+    }
+
+    // Verificar si ya existe una cita para el estilista en el mismo rango de horas
+    const existingCitaSameRange = await Cita.findOne({
+      estilista,
+      fechaCita: fechaCitaNormalizada,
+      $or: [
+        {
+          $and: [
+            { horaCita: { $lte: horaCitaNormalizada } },
+            { horaFinCita: { $gt: horaCitaNormalizada } },
+          ],
+        },
+        {
+          $and: [
+            { horaCita: { $lt: horaFinCitaNormalizada } },
+            { horaFinCita: { $gte: horaFinCitaNormalizada } },
+          ],
+        },
+        {
+          $and: [
+            { horaCita: { $gte: horaCitaNormalizada } },
+            { horaFinCita: { $lte: horaFinCitaNormalizada } },
+          ],
+        },
+      ],
+    });
+
+    if (existingCitaSameRange) {
+      return res.status(400).json({ error: 'Ya existe una cita para el estilista en el mismo rango de horas.' });
+    }
+
+
+    const existingCita = await Cita.aggregate([
+      {
+        $match: {
+          estilista,
+          fechaCita: {
+            $gte: fechaCitaNormalizada,
+            $lt: new Date(horaFinCitaNormalizada.getTime() + duracionCita),
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: 'turnos',
+          localField: 'estilista',
+          foreignField: 'estilista',
+          as: 'turno',
+        },
+      },
+      {
+        $unwind: '$turno',
+      },
+      {
+        $project: {
+          'turno.inicioM': 1,
+          'turno.finM': 1,
+          'turno.inicioT': 1,
+          'turno.finT': 1,
+          'cita.fechaCita': 1,
+          'cita.horaCita': 1,
+          'cita.horaFinCita': 1,
+        },
+      },
+      {
+        $addFields: {
+          inicioTurno: {
+            $cond: [
+              { $eq: ['$turno.dia', diaSemana] },
+              { $cond: [{ $eq: ['$turno.turno', 'MAÑANA'] }, '$turno.inicioM', '$turno.inicioT'] },
+              null,
+            ],
+          },
+          finTurno: {
+            $cond: [
+              { $eq: ['$turno.dia', diaSemana] },
+              { $cond: [{ $eq: ['$turno.turno', 'MAÑANA'] }, '$turno.finM', '$turno.finT'] },
+              null,
+            ],
+          },
+        },
+      },
+      {
+        $match: {
+          $or: [
+            {
+              $and: [
+                { 'cita.horaCita': { $lte: '$inicioTurno' } },
+                { 'cita.horaFinCita': { $gt: '$inicioTurno' } },
+              ],
+            },
+            {
+              $and: [
+                { 'cita.horaCita': { $lt: '$finTurno' } },
+                { 'cita.horaFinCita': { $gte: '$finTurno' } },
+              ],
+            },
+            {
+              $and: [
+                { 'cita.horaCita': { $gte: '$inicioTurno' } },
+                { 'cita.horaFinCita': { $lte: '$finTurno' } },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        $limit: 1,
+      },
+    ]);
+    
+    if (existingCita.length > 0) {
+      return res.status(400).json({ error: 'Ya existe una cita para el estilista en el mismo rango de horas.' });
+    }
+
+    await Cita.findByIdAndUpdate(id,{ cliente, servicio, estilista, fechaCita, horaCita})
+    
+
+    // actualiza y guardar la nueva cita
+
+    res.status(200).json({
+      message: 'Cita actualizada exitosamente',
+      cita: {
+        cliente: citaSave.cliente,
+        servicio: citaSave.servicio,
+        estilista: citaSave.estilista,
+        fechaCita: citaSave.fechaCita,
+        horaCita: citaSave.horaCita,
+        horaFinCita: citaSave.horaFinCita,
+      },
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error al procesar la solicitud' });
