@@ -37,10 +37,6 @@ export const serviciosUtilizados = async (req, res) => {
 
         ]);
 
-
-
-
-
         return res.json(serviciosUtilizados);
 
     } catch (error) {
@@ -50,24 +46,23 @@ export const serviciosUtilizados = async (req, res) => {
 
 }
 
-
 export const citasPorDia = async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
-    
-        if (!startDate || !endDate) {
-          return res.status(400).json({ error: "Se requieren las fechas de inicio y fin." });
-        }
-    
-        const startMoment = moment(startDate).startOf('day');
-        const endMoment = moment(endDate).endOf('day');
-    
-        if (!startMoment.isValid() || !endMoment.isValid()) {
-          return res.status(400).json({ error: "Formato de fecha inválido." });
+
+        // Verificar que las fechas de inicio y fin estén presentes y sean válidas
+        if (!startDate || !endDate || isNaN(new Date(startDate).getTime()) || isNaN(new Date(endDate).getTime())) {
+            return res.status(400).json({ error: "Las fechas de inicio y fin son inválidas o no fueron proporcionadas." });
         }
 
-        // Establecer el idioma de Moment.js a español
-        moment.locale("es");
+        // Ajustar la fecha de fin para incluir todo el día
+        const startMoment = moment.utc(startDate);
+        const endMoment = moment.utc(endDate).endOf('day');
+
+        // Verificar que startDate no sea mayor que endDate
+        if (startMoment.isAfter(endMoment)) {
+            return res.status(400).json({ error: "La fecha de inicio no puede ser mayor que la fecha de fin." });
+        }
 
         // Inicializar un objeto para almacenar la cantidad de citas por día de la semana
         const citasPorDia = {
@@ -79,25 +74,33 @@ export const citasPorDia = async (req, res) => {
             viernes: 0,
             sábado: 0,
         };
-    
+
         // Obtener todas las citas entre las fechas dadas
         const citas = await Cita.find({
-          fechaCita: { $gte: startMoment.toDate(), $lte: endMoment.toDate() },
+            fechaCita: { $gte: startMoment, $lte: endMoment },
         });
-    
+
+        moment.locale('es')
         // Contar las citas por día de la semana
         citas.forEach((cita) => {
-          const dayOfWeek = moment(cita.fechaCita).day();
-          const dayName = moment().day(dayOfWeek).format("dddd").toLowerCase();
-          citasPorDia[dayName]++;
-        });
+            const dayName = moment.utc(cita.fechaCita).format('dddd');
+            citasPorDia[dayName.toLowerCase()]++;
     
+        });
+
+        // Validar si no hay información en esas fechas
+        if (Object.values(citasPorDia).every(count => count === 0)) {
+            return res.status(400).json({ error: "No hay información disponible para las fechas proporcionadas." });
+        }
+
         res.json({ citasPorDia });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Error interno del servidor." });
     }
 };
+
+
 
 
 

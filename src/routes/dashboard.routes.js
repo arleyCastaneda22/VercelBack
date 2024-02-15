@@ -6,12 +6,4 @@ router.get('/servicios-utilizados', serviciosUtilizados)
 
     .get('/citas-por-dia', citasPorDia)
 
-
-
-
-
-
-
-
-
 export default router
