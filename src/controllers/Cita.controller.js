@@ -403,6 +403,9 @@ export const editarCita = async (req, res) => {
   try {
     const id=req.params.id;
     const { cliente, servicio, estilista, fechaCita, horaCita } = req.body;
+
+    console.log("fecha que trae el formulario",fechaCita.toLocaleString())
+    console.log("hora que trae el formulario",horaCita.toLocaleString())
     
     const fechaCitaNormalizada = new Date(fechaCita);
     const horaCitaNormalizada = new Date(horaCita);
@@ -445,7 +448,7 @@ export const editarCita = async (req, res) => {
 
     const { inicioM, finM, inicioT, finT } = turno;
 
-    const inicioMToday = new Date(now); // Crear una nueva fecha basada en la actual
+    const inicioMToday = new Date(horaCitaNormalizada); // Crear una nueva fecha basada en la actual
     inicioMToday.setHours(inicioM.getHours(), inicioM.getMinutes(), 0, 0);
 
     const finMToday = new Date(now);
@@ -598,20 +601,17 @@ export const editarCita = async (req, res) => {
       return res.status(400).json({ error: 'Ya existe una cita para el estilista en el mismo rango de horas.' });
     }
 
-    await Cita.findByIdAndUpdate(id,{ cliente, servicio, estilista, fechaCita, horaCita})
-    
-
-    // actualiza y guardar la nueva cita
+    const citaActualizada = await Cita.findByIdAndUpdate(id, { cliente, servicio, estilista, fechaCita, horaCita }, { new: true });
 
     res.status(200).json({
       message: 'Cita actualizada exitosamente',
       cita: {
-        cliente: citaSave.cliente,
-        servicio: citaSave.servicio,
-        estilista: citaSave.estilista,
-        fechaCita: citaSave.fechaCita,
-        horaCita: citaSave.horaCita,
-        horaFinCita: citaSave.horaFinCita,
+        cliente: citaActualizada.cliente,
+        servicio: citaActualizada.servicio,
+        estilista: citaActualizada.estilista,
+        fechaCita: citaActualizada.fechaCita,
+        horaCita: citaActualizada.horaCita,
+        horaFinCita: citaActualizada.horaFinCita,
       },
     });
   } catch (error) {
