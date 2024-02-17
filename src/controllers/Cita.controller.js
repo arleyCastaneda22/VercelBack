@@ -45,12 +45,9 @@ export const createCita = async (req, res) => {
       return res.status(400).json({ error: 'El estilista no tiene turno disponible para este día.' });
     }
 
-    if (fechaCitaNormalizada < now) {
-      return res.status(400).json({ error: 'La fecha de la cita debe ser en el futuro.' });
-    }
-
+    
     const { inicioM, finM, inicioT, finT } = turno;
-
+    
     const inicioMToday = new Date(now); // Crear una nueva fecha basada en la actual
     inicioMToday.setHours(inicioM.getHours(), inicioM.getMinutes(), 0, 0);
 
@@ -62,7 +59,7 @@ export const createCita = async (req, res) => {
 
     const finTToday = new Date(now);
     finTToday.setHours(finT.getHours(), finT.getMinutes(), 0, 0);
-
+    
     console.log('Inicio del turno MAÑANA:', inicioMToday.toLocaleString());
     console.log('Fin del Turno MAÑANA:', finMToday.toLocaleString());
     console.log('Inicio del turno TARDE:', inicioTToday.toLocaleString());
@@ -80,14 +77,31 @@ export const createCita = async (req, res) => {
     finM.setSeconds(0, 0);
     inicioT.setSeconds(0, 0);
     finT.setSeconds(0, 0);
+
+
+    //citas futuras
     
+    const DateToday = new Date(now);
+
+    DateToday.setHours(inicioMToday.getHours(), 0, 0, 0);
+
+    console.log("la fecha de hoy es: ",DateToday.toLocaleString());
+    console.log(DateToday.getHours())
+    console.log(now.getHours())
+    console.log(fechaCitaNormalizada.getHours())
+    console.log(DateToday.getDay())
+    console.log(now.getDay())
 
 
+    if (horaCitaNormalizada.getHours() < now.getHours() || fechaCitaNormalizada.getDate() < now.getDate()) {
+      return res.status(400).json({ error: 'La fecha de la cita debe ser en el futuro.' });
+    } 
+    
     if (
       !(horaCitaNormalizada >= inicioMToday && horaFinCitaNormalizada <= finMToday) &&
       !(horaCitaNormalizada >= inicioTToday && horaFinCitaNormalizada <= finTToday)
-    ) {
-      return res.status(400).json({ error: 'La hora de la cita está fuera del rango de trabajo del estilista.' });
+      ) {
+        return res.status(400).json({ error: 'La hora de la cita está fuera del rango de trabajo del estilista.' });
     }
 
     // Verificar si ya existe una cita para el estilista en el mismo rango de horas
@@ -442,10 +456,7 @@ export const editarCita = async (req, res) => {
       return res.status(400).json({ error: 'El estilista no tiene turno disponible para este día.' });
     }
 
-    if (fechaCitaNormalizada < now) {
-      return res.status(400).json({ error: 'La fecha de la cita debe ser en el futuro.' });
-    }
-
+    
     const { inicioM, finM, inicioT, finT } = turno;
 
     const inicioMToday = new Date(horaCitaNormalizada); // Crear una nueva fecha basada en la actual
@@ -477,9 +488,18 @@ export const editarCita = async (req, res) => {
     finM.setSeconds(0, 0);
     inicioT.setSeconds(0, 0);
     finT.setSeconds(0, 0);
+
+    const DateToday = new Date(now);
+
+    DateToday.setHours(inicioMToday.getHours(), 0, 0, 0);
+
+
+      //citas futuras    
+    if (horaCitaNormalizada.getHours() < now.getHours() || fechaCitaNormalizada.getDate() < now.getDate()) {
+      return res.status(400).json({ error: 'La fecha de la cita debe ser en el futuro.' });
+    }
     
-
-
+    
     if (
       !(horaCitaNormalizada >= inicioMToday && horaFinCitaNormalizada <= finMToday) &&
       !(horaCitaNormalizada >= inicioTToday && horaFinCitaNormalizada <= finTToday)

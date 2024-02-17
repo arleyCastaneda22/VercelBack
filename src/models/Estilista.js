@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 import mongoose from 'mongoose';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 const estilistaSchema = new Schema({
     nombre: {
