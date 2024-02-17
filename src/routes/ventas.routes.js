@@ -1,5 +1,5 @@
 import Router from'express'
-import {crearVenta,obtenerVentas,eliminarVenta, obtenerVentaPorId} from '../controllers/ventas.controller.js'
+import {crearVenta,obtenerVentas,eliminarVenta, obtenerVentaPorId, actualizarVenta, actualizarEstado} from '../controllers/ventas.controller.js'
 const router =Router()
 
 router.post('/ventas', crearVenta )
@@ -7,7 +7,11 @@ router.post('/ventas', crearVenta )
 
     .delete('/ventas/:id', eliminarVenta)
 
+    .get('/ventas/estado/:id', actualizarEstado)
+
     .get('/ventas/:id', obtenerVentaPorId)
+
+    .put('/ventas/:id', actualizarVenta )
 
 export default router;
 

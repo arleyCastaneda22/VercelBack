@@ -53,3 +53,15 @@ export const eliminarVenta = async (req, res) => {
     }
 };
 
+export const actualizarEstado=async(req,res)=>{
+    try {
+        const id = req.params.id;
+        const actualizadoEstado = await Ventas.findById(id)
+        actualizadoEstado.estado=!actualizadoEstado.estado;
+        await actualizadoEstado.save()
+        res.status(204).json(actualizadoEstado);
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({message: error.message})
+    }
+}

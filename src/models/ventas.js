@@ -17,6 +17,11 @@ const ventasSchema = new Schema({
         required:true
     },
 
+    estado:{
+        type:Boolean,
+        default:true
+    }
+
 },{
     timestamps:true,
     versionKey:false

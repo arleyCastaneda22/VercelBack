@@ -5,7 +5,7 @@ import { createCita, listarCita, eliminarCita, actualizarEstadoCita, CitaPorEsti
 const router = Router();
 
 router
-    .get('/citas', listarCita )
+    .get('/citas', listarCita)
 
     .get('/citas/:id', listarUnaCita)
 
@@ -17,7 +17,11 @@ router
 
     .delete('/citas/:id', eliminarCita)
 
-    .put('/citas/estado/:id',actualizarEstadoCita)
+    .put('/citas/estado/:id', actualizarEstadoCita)
+
+    .get('/citas/:estilistaId/citas', getCitasByEstilistaId)
+
+    .get('/citas/:clienteId/citas1', getCitasByClienteId)
 
 
 

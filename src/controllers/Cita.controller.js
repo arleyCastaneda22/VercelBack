@@ -16,7 +16,7 @@ export const createCita = async (req, res) => {
     
     fechaCitaNormalizada.setMilliseconds(0);
     horaCitaNormalizada.setMilliseconds(0);
-    
+
     // Obtén la duración del servicio desde la base de datos (puedes necesitar ajustar esto según tu modelo)
     const duracionServicio = await Servicio.findById(servicio).select('duracion').exec();
 
@@ -24,8 +24,8 @@ export const createCita = async (req, res) => {
     const duracionCita = duracionServicio.duracion * 60 * 1000;
     const horaFinCitaNormalizada = new Date(horaCitaNormalizada.getTime() + duracionCita);
 
-    
-    
+
+
     // Ajustar las fechas a la precisión de minutos
     fechaCitaNormalizada.setSeconds(0, 0);
     horaCitaNormalizada.setSeconds(0, 0);
@@ -294,6 +294,7 @@ async function verificarCitaDuplicada(estilista, fechaCita, horaCita, duracionCi
 }
 
 
+
 function obtenerDiaSemana(dia) {
   const diasSemana = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
   return diasSemana[dia];
@@ -349,12 +350,12 @@ export const listarUnaCita=async(req,res)=>{
 
 export const eliminarCita=async(req,res)=>{
   try {
-      const id =req.params.id;
-      const eliminadoCita=await Cita.deleteOne({_id:id});
-      res.status(204).json(eliminadoCita);
+    const id = req.params.id;
+    const eliminadoCita = await Cita.deleteOne({ _id: id });
+    res.status(204).json(eliminadoCita);
   } catch (error) {
-      console.log(error)
-      return res.status(500).json({message: error.message})
+    console.log(error)
+    return res.status(500).json({ message: error.message })
   }
 }
 
