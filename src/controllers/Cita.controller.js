@@ -640,3 +640,40 @@ export const editarCita = async (req, res) => {
     res.status(500).json({ error: 'Error al procesar la solicitud' });
   }
 };
+
+export const getCitasByEstilistaId = async (req, res) => {
+  
+  try {
+    const estilistaId = req.params.estilistaId;
+    const citas = await Cita.find({ estilista: estilistaId })
+    
+    .populate('estilista')
+    .populate('cliente').
+
+    populate('servicio')
+    
+    res.json(citas);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al obtener las citas del estilista.' });
+  }
+};
+
+export const getCitasByClienteId = async (req, res) => {
+  try {
+    const clienteId = req.params.clienteId;
+    console.log('ID del cliente:', clienteId);
+
+    // Busca todas las citas asociadas al ID del cliente
+    const citas = await Cita.find({ cliente: clienteId })
+    .populate('estilista')
+    .populate('cliente').
+
+    populate('servicio');
+
+    res.json(citas);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: 'Error del servidor' });
+  }
+};

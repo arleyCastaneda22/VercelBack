@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createCita, listarCita, eliminarCita, actualizarEstadoCita, CitaPorEstilista, editarCita, listarUnaCita} from '../controllers/Cita.controller.js'
+import { createCita, listarCita, eliminarCita, actualizarEstadoCita, CitaPorEstilista, editarCita, listarUnaCita, getCitasByClienteId, getCitasByEstilistaId} from '../controllers/Cita.controller.js'
 
 
 const router = Router();
