@@ -93,9 +93,10 @@ export const createCita = async (req, res) => {
     console.log(now.getDay())
 
 
-    if (horaCitaNormalizada.getHours() < now.getHours() || fechaCitaNormalizada.getDate() < now.getDate()) {
+    if (fechaCitaNormalizada.getDate() < now.getDate()) {
       return res.status(400).json({ error: 'La fecha de la cita debe ser en el futuro.' });
     } 
+    
     
     if (
       !(horaCitaNormalizada >= inicioMToday && horaFinCitaNormalizada <= finMToday) &&
@@ -496,7 +497,7 @@ export const editarCita = async (req, res) => {
 
 
       //citas futuras    
-    if (horaCitaNormalizada.getHours() < now.getHours() || fechaCitaNormalizada.getDate() < now.getDate()) {
+    if (fechaCitaNormalizada.getDate() < now.getDate()) {
       return res.status(400).json({ error: 'La fecha de la cita debe ser en el futuro.' });
     }
     
