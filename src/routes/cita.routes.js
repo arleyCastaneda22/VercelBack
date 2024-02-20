@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createCita, listarCita, eliminarCita, actualizarEstadoCita, CitaPorEstilista, editarCita, listarUnaCita, getCitasByClienteId, getCitasByEstilistaId} from '../controllers/Cita.controller.js'
+import { createCita, listarCita, listarUnaCita, eliminarCita, actualizarEstadoCita, getCitasByEstilistaId, getCitasByClienteId, editarCita} from '../controllers/Cita.controller.js'
 
 
 const router = Router();
@@ -9,15 +9,13 @@ router
 
     .get('/citas/:id', listarUnaCita)
 
-    .get('/citas/estilista/:estilistaId',CitaPorEstilista)
-
-    .post('/citas',createCita)
-
-    .put('/citas/:id', editarCita)
+    .post('/citas', createCita)
 
     .delete('/citas/:id', eliminarCita)
 
     .put('/citas/estado/:id', actualizarEstadoCita)
+
+    .put('/citas/:id', editarCita)
 
     .get('/citas/:estilistaId/citas', getCitasByEstilistaId)
 
