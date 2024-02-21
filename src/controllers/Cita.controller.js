@@ -14,34 +14,18 @@ export const createCita = async (req, res) => {
     const fechaCitaNormalizada = new Date(fechaCita);
     const horaCitaNormalizada = new Date(horaCita);
     const now = new Date(); // Obtener la fecha y hora actual
-    
-    
+
+    fechaCitaNormalizada.setMilliseconds(0);
+    horaCitaNormalizada.setMilliseconds(0);
+
     // Obtén la duración del servicio desde la base de datos (puedes necesitar ajustar esto según tu modelo)
     const duracionServicio = await Servicio.findById(servicio).select('duracion').exec();
-    
 
 
 
     // const duracionCita = 60 * 60 * 1000; // Duración en milisegundos (1 hora)
     const duracionCita = duracionServicio.duracion * 60 * 1000;
     const horaFinCitaNormalizada = new Date(horaCitaNormalizada.getTime() + duracionCita);
-    
-    // Calcula la hora de finalización de la cita sumando la duración del servicio
-    const horaFinCita = new Date(horaCitaNormalizada.getTime() + duracionServicio.duracion);
-    
-    
-    // Ajustar las fechas a la precisión de minutos
-    // horaCitaNormalizada.setMilliseconds(0);
-    // horaCitaNormalizada.setSeconds(0, 0);
-    // horaFinCitaNormalizada.setSeconds(0, 0);
-    // fechaCitaNormalizada.setMilliseconds(0);
-    // fechaCitaNormalizada.setSeconds(0, 0);
-
-    const diaFecha = fechaCitaNormalizada.toLocaleString();
-    console.log("PRUEBA: ",diaFecha)
-
-
-
 
 
 
@@ -52,6 +36,7 @@ export const createCita = async (req, res) => {
 
     const diaSemana = obtenerDiaSemana(fechaCitaNormalizada.getDay());
 
+    // console.log("\ndia de la semana del turno:",diaSemana.toLocaleString())
 
     const turno = await Turno.findOne({ estilista, dia: diaSemana, estado: true });
 
@@ -65,12 +50,7 @@ export const createCita = async (req, res) => {
 
     const { inicioM, finM, inicioT, finT } = turno;
 
-    console.log(inicioM.toDateString())
-    console.log(finM.toDateString())
-    console.log(inicioT.toDateString())
-    console.log(finT.toDateString())
-    
-    const inicioMToday = new Date(inicioM); // Crear una nueva fecha basada en la actual
+    const inicioMToday = new Date(now); // Crear una nueva fecha basada en la actual
     inicioMToday.setHours(inicioM.getHours(), inicioM.getMinutes(), 0, 0);
 
     const finMToday = new Date(now);
@@ -81,10 +61,6 @@ export const createCita = async (req, res) => {
 
     const finTToday = new Date(now);
     finTToday.setHours(finT.getHours(), finT.getMinutes(), 0, 0);
-    
-    console.log("\nTurno del estilista HOY:\n")
-    console.log('Inicio del turno MAÑANA:', inicioMToday.toLocaleDateString());
-    console.log('Fin del Turno MAÑANA:', finMToday.toLocaleDateString());
 
     console.log('Inicio del turno MAÑANA:', inicioMToday.toLocaleString());
     console.log('Fin del Turno MAÑANA:', finMToday.toLocaleString());
@@ -106,34 +82,6 @@ export const createCita = async (req, res) => {
 
 
 
-    //citas futuras
-    
-    const DateToday = new Date(now);
-
-    DateToday.setHours(inicioMToday.getHours(), 0, 0, 0);
-
-    console.log("\nla fecha de hoy es: ",now.toLocaleString());
-    console.log("Hora de hoy: ",DateToday.getHours())
-    console.log("hora de la AHORA: ",now.getHours())
-    console.log("hora de la cita: ",horaCitaNormalizada.getHours())
-    console.log("hora de la cita: ",horaCitaNormalizada.toLocaleString())
-    console.log("hora de la cita: ",fechaCitaNormalizada.toLocaleTimeString())
-    console.log("dia de hoy: ",DateToday.getDay())
-
-    console.log(fechaCitaNormalizada.toLocaleString())
-
-    console.log(fechaCitaNormalizada < now)
-    console.log(fechaCitaNormalizada.getDate() < now.getDate())
-    
-
-    // // if (fechaCitaNormalizada < now || (fechaCitaNormalizada.getTime() === now.getTime() && horaCitaNormalizada.getHours() <= now.getHours())) {
-    // //   return res.status(400).json({ error: 'La cita debe ser en el futuro.' });
-    // // }
-
-    // if (horaCitaNormalizada.getHours() < now.getHours() || fechaCitaNormalizada.getDate() < now.getDate()) {
-    //   return res.status(400).json({ error: 'La cita de debe ser en el futuro.' });
-    // }
-    
     if (
       !(horaCitaNormalizada >= inicioMToday && horaFinCitaNormalizada <= finMToday) &&
       !(horaCitaNormalizada >= inicioTToday && horaFinCitaNormalizada <= finTToday)
