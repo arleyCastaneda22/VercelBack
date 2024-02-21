@@ -2,6 +2,8 @@
 import Cita from '../models/Cita.js';
 import Servicio from '../models/Servicio.js'
 import Turno from '../models/Turnos.js';
+import { transporter } from '../helpers/nodemailer.js'
+
 
 
 
@@ -530,7 +532,10 @@ export const actualizarEstadoCita = async (req, res) => {
     const nuevoEstado = req.body.estado;
 
     // Realiza la lógica para actualizar el estado en la base de datos
-    const citaActualizada = await Cita.findByIdAndUpdate(citaId, { estado: nuevoEstado }, { new: true });
+    const citaActualizada = await Cita.findByIdAndUpdate(citaId, { estado: nuevoEstado }, { new: true })
+      .populate('cliente')
+      .populate('estilista')
+      .populate('servicio');
 
     if (!citaActualizada) {
       return res.status(404).json({ error: 'Cita no encontrada' });
@@ -542,6 +547,57 @@ export const actualizarEstadoCita = async (req, res) => {
     }
 
 
+
+    const htmlMessage = `
+    <div style="border-radius: 8px; border: 1px solid #e2e8f0; background-color: #fff; color: #1a202c; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);" data-v0-t="card">
+        <div style="padding: 24px;" class="flex flex-col space-y-1.5">
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px;">
+                        <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+                        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                    </svg>
+                    <h1 style="font-size: 1.5rem; font-weight: bold; margin: 0;">Cita Agendada</h1>
+                </div>
+            </div>
+        </div>
+        <div style="padding: 24px;">
+            <div style="grid-gap: 0.5rem; font-size: 0.875rem;">
+                <div style="display: grid; grid-template-columns: 1fr auto; gap: 0.25rem;">
+                    <div style="font-weight: 500;">Para</div>
+                    <div style="text-align: right;">${citaActualizada.cliente.nombre} ${citaActualizada.cliente.apellido}</div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr auto; gap: 0.25rem;">
+                    <div style="font-weight: 500;">De</div>
+                    <div style="text-align: right;">Salón de Cielo Spa</div>
+                </div>
+            </div>
+            <div style="border-top: 1px solid #e2e8f0; margin-top: 1rem; margin-bottom: 1rem;"></div>
+            <div style="font-size: 1rem; margin-bottom: 1rem; line-height: 1.5;">
+                <p>Hola,</p>
+                <p>Nos complace informarle que el estado de su cita ha sido actualizado a: ${nuevoEstado}.</p>
+                <p>Aquí están los detalles de su cita:</p>
+                <ul style="margin-bottom: 1rem; padding-left: 1rem;">
+                    <li><strong>Servicio:</strong> ${citaActualizada.servicio.nombre_servicio}</li>
+                    <li><strong>Estilista:</strong> ${citaActualizada.estilista.nombre} ${citaActualizada.estilista.apellido}</li>
+                    <li><strong>Fecha de la cita:</strong> ${citaActualizada.fechaCita.toLocaleString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' })}</li>
+                    <li><strong>Hora de la cita:</strong> ${citaActualizada.horaCita.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: true  })}</li>
+                </ul>
+                <p>Gracias por elegir el Salón de Cielo Spa. Esperamos verlo el día de su cita.</p>
+                <p>Saludos cordiales,</p>
+                <p>El equipo del Salón de Cielo spa</p>
+            </div>
+        </div>
+    </div>
+`;
+
+    await transporter.sendMail({
+      from: '"Cambio de estado de cita 👻" <beautysoft262@gmail.com>', 
+      to: citaActualizada.cliente.email, 
+      subject: "Cambio de estado de cita", 
+      text: "Hello world?", 
+      html: htmlMessage, 
+    });
 
     res.status(200).json({ message: 'Estado de la cita actualizado exitosamente' });
   } catch (error) {
