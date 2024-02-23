@@ -11,6 +11,8 @@ export const createCita = async (req, res) => {
   try {
     const { cliente, servicio, estilista, fechaCita, horaCita } = req.body;
 
+
+
     const fechaCitaNormalizada = new Date(fechaCita);
     const horaCitaNormalizada = new Date(horaCita);
     const now = new Date(); // Obtener la fecha y hora actual
@@ -44,9 +46,9 @@ export const createCita = async (req, res) => {
       return res.status(400).json({ error: 'El estilista no tiene turno disponible para este día o el estado está inactivo.' });
     }
 
-    if (fechaCitaNormalizada < now) {
-      return res.status(400).json({ error: 'La fecha de la cita debe ser en el futuro.' });
-    }
+    // if (fechaCitaNormalizada < now) {
+    //   return res.status(400).json({ error: 'La fecha de la cita debe ser en el futuro.' });
+    // }
 
     const { inicioM, finM, inicioT, finT } = turno;
 
@@ -542,13 +544,11 @@ export const actualizarEstadoCita = async (req, res) => {
     }
 
     // Verifica si el nuevo estado es uno de los estados válidos
-    if (!['confirmada', 'cancelada', 'en espera', 'pendiente'].includes(nuevoEstado)) {
+    if (!['confirmada', 'cancelada'].includes(nuevoEstado)) {
       return res.status(400).json({ error: 'Estado no válido' });
     }
-
-
-
-    const htmlMessage = `
+    if(['confirmada', 'cancelada'].includes(nuevoEstado)){
+      const htmlMessage = `
     <div style="border-radius: 8px; border: 1px solid #e2e8f0; background-color: #fff; color: #1a202c; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);" data-v0-t="card">
         <div style="padding: 24px;" class="flex flex-col space-y-1.5">
             <div class="flex items-center space-x-4">
@@ -599,6 +599,9 @@ export const actualizarEstadoCita = async (req, res) => {
       html: htmlMessage, 
     });
 
+      
+    }
+    
     res.status(200).json({ message: 'Estado de la cita actualizado exitosamente' });
   } catch (error) {
     console.error(error);
