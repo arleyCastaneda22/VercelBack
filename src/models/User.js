@@ -11,16 +11,19 @@ const userSchema = new mongoose.Schema({
   },
   nombre: {
     type: String,
+    require: true,
   },
   apellido: {
     type: String,
+    require: true,
   },
   contrasena: {
     type: String,
     required: true,
   },
   telefono:{
-    type:String
+    type:String,
+    require: true,
   },
   direccion:{
     type:String
