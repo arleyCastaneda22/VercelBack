@@ -544,7 +544,7 @@ export const actualizarEstadoCita = async (req, res) => {
     }
 
     // Verifica si el nuevo estado es uno de los estados válidos
-    if (!['confirmada', 'cancelada'].includes(nuevoEstado)) {
+    if (!['confirmada', 'cancelada', 'pendiente', 'finalizada'].includes(nuevoEstado)) {
       return res.status(400).json({ error: 'Estado no válido' });
     }
     if(['confirmada', 'cancelada'].includes(nuevoEstado)){
