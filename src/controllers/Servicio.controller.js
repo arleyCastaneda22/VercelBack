@@ -1,5 +1,6 @@
 import Servicio from '../models/Servicio.js'
 import Estilista from '../models/Estilista.js'
+import Cita from '../models/Cita.js'
 import fs from 'fs';
 
 
@@ -96,18 +97,30 @@ export const eliminarServicio = async (req, res) => {
         return res.status(500).json({ message: error.message })
     }
 }
-export const actualizarEstado=async(req,res)=>{
+export const actualizarEstado = async (req, res) => {
     try {
         const id = req.params.id;
-        const actualizadoEstado = await Servicio.findById(id)
-        actualizadoEstado.estado=!actualizadoEstado.estado;
-        await actualizadoEstado.save()
-        res.status(204).json(actualizadoEstado);
+        const servicio = await Servicio.findById(id);
+
+        const citasAsociadas = await Cita.find({
+            servicio: id,
+            estado: { $in: ['confirmada', 'pendiente'] }
+        });
+
+        if (citasAsociadas.length > 0) {
+            return res.status(400).json({ message: 'El servicio tiene citas asociadas. Por favor, cambiala a cancelada o eliminala' });
+        }
+
+        // Cambiar el estado
+        servicio.estado = !servicio.estado;
+        await servicio.save();
+
+        res.status(204).json(servicio);
     } catch (error) {
-        console.log(error)
-        return res.status(500).json({message: error.message})
+        console.log(error);
+        return res.status(500).json({ message: error.message });
     }
-}
+};
 
 export const estilistaPorServicio =async(req, res)=>{
     try {
