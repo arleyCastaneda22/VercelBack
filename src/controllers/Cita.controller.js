@@ -11,12 +11,18 @@ export const createCita = async (req, res) => {
   try {
     const { cliente, servicio, estilista, fechaCita, horaCita } = req.body;
 
+    console.log("\nfecha que trae el formulario: ",fechaCita.toLocaleString());
+    console.log("hora que trae el formulario: ",horaCita.toLocaleString());
+
     const fechaCitaNormalizada = new Date(fechaCita);
     const horaCitaNormalizada = new Date(horaCita);
     const now = new Date(); // Obtener la fecha y hora actual
 
-    fechaCitaNormalizada.setHours(horaCitaNormalizada.getHours(),horaCitaNormalizada.getMinutes(),0,0);
-    horaCitaNormalizada.setMilliseconds(0);
+    // fechaCitaNormalizada.setHours(horaCitaNormalizada.getHours(),horaCitaNormalizada.getMinutes(),0,0);
+    horaCitaNormalizada.setHours(horaCitaNormalizada.getHours(),horaCitaNormalizada.getMinutes(),0,0);
+
+
+    fechaCitaNormalizada.setMilliseconds(0);
 
     // Obtén la duración del servicio desde la base de datos (puedes necesitar ajustar esto según tu modelo)
     const duracionServicio = await Servicio.findById(servicio).select('duracion').exec();
@@ -38,7 +44,6 @@ export const createCita = async (req, res) => {
 
     const diaSemana = obtenerDiaSemana(fechaCitaNormalizada.getDay());
 
-    // console.log("\ndia de la semana del turno:",diaSemana.toLocaleString())
 
     const turno = await Turno.findOne({ estilista, dia: diaSemana, estado: true });
 
@@ -52,16 +57,16 @@ export const createCita = async (req, res) => {
 
     const { inicioM, finM, inicioT, finT } = turno;
 
-    const inicioMToday = new Date(fechaCitaNormalizada); // Crear una nueva fecha basada en la actual
+    const inicioMToday = new Date(now); // Crear una nueva fecha basada en la actual
     inicioMToday.setHours(inicioM.getHours(), inicioM.getMinutes(), 0, 0);
 
-    const finMToday = new Date(fechaCitaNormalizada);
+    const finMToday = new Date(now);
     finMToday.setHours(finM.getHours(), finM.getMinutes(), 0, 0);
 
-    const inicioTToday = new Date(fechaCitaNormalizada);
+    const inicioTToday = new Date(now);
     inicioTToday.setHours(inicioT.getHours(), inicioT.getMinutes(), 0, 0);
 
-    const finTToday = new Date(fechaCitaNormalizada);
+    const finTToday = new Date(now);
     finTToday.setHours(finT.getHours(), finT.getMinutes(), 0, 0);
 
     console.log('Inicio del turno MAÑANA:', inicioMToday.toLocaleString());
@@ -69,12 +74,11 @@ export const createCita = async (req, res) => {
     console.log('Inicio del turno TARDE:', inicioTToday.toLocaleString());
     console.log('Fin del Turno TARDE:', finTToday.toLocaleString());
 
-    console.log('Fecha y hora de inicio:', fechaCitaNormalizada.toLocaleString());
+    console.log('Fecha y hora de inicio (fecha normalizada):', fechaCitaNormalizada.toLocaleString());
+    console.log('Fecha y hora de inicio (hora normalizada):', horaCitaNormalizada.toLocaleString());
     console.log('Fecha y hora de finalizacion:', horaFinCitaNormalizada.toLocaleString());
     console.log('Duracion del servicio:', duracionServicio.duracion.toLocaleString());
 
-    console.log(horaCitaNormalizada >= inicioM && horaFinCitaNormalizada <= finM)
-    console.log(horaCitaNormalizada >= inicioT && horaFinCitaNormalizada <= finT)
 
     // Ajustar las fechas a la precisión de minutos
     inicioM.setSeconds(0, 0);
@@ -85,8 +89,8 @@ export const createCita = async (req, res) => {
 
 
     if (
-      !(fechaCitaNormalizada >= inicioMToday && fechaCitaNormalizada <= finMToday) &&
-      !(fechaCitaNormalizada >= inicioTToday && fechaCitaNormalizada <= finTToday)
+      !(horaCitaNormalizada >= inicioMToday && horaFinCitaNormalizada <= finMToday) &&
+      !(horaCitaNormalizada >= inicioTToday && horaFinCitaNormalizada <= finTToday)
     ) {
       return res.status(400).json({ error: 'La hora de la cita está fuera del rango de trabajo del estilista.' });
     }
@@ -121,19 +125,8 @@ export const createCita = async (req, res) => {
       return res.status(400).json({ error: 'Ya existe una cita para el estilista en el mismo rango de horas.' });
     }
 
-    const existingCita = await Cita.findOne({
-      estilista,
-      fechaCita: fechaCitaNormalizada,
-      horaCita: horaCitaNormalizada,
-      servicio,
-    });
-    
-    if (existingCita) {
-      return res.status(400).json({ error: 'Ya existe una cita con estos detalles.' });
-    }
 
-
-    const existingSameCita = await Cita.aggregate([
+    const existingCita = await Cita.aggregate([
       {
         $match: {
           estilista,
@@ -212,11 +205,9 @@ export const createCita = async (req, res) => {
       },
     ]);
 
-    if (existingSameCita.length > 0) {
+    if (existingCita.length > 0) {
       return res.status(400).json({ error: 'Ya existe una cita para el estilista en el mismo rango de horas.' });
     }
-
-    
 
 
     // Crear y guardar la nueva cita
@@ -253,7 +244,6 @@ export const createCita = async (req, res) => {
     }
   }
 };
-
 
 
 function obtenerDiaSemana(dia) {
