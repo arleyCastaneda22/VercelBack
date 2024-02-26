@@ -1,4 +1,5 @@
 import User from '../models/User.js'
+import Cita from '../models/Cita.js'
 import bcrypt from 'bcryptjs'
 
 
@@ -107,16 +108,29 @@ export const eliminarUsuario=async(req,res)=>{
 }
 
 
-export const actualizarEstado=async(req,res)=>{
+export const actualizarEstado = async (req, res) => {
     try {
         const id = req.params.id;
-        const actualizadoEstado = await User.findById(id)
-        actualizadoEstado.estado=!actualizadoEstado.estado;
-        await actualizadoEstado.save()
-        res.status(204).json(actualizadoEstado);
+        const usuario = await User.findById(id);
+
+        const citasAsociadas = await Cita.find({
+            cliente: id,
+            estado: { $in: ['confirmada', 'pendiente'] }
+        });
+
+        if (citasAsociadas.length > 0) {
+            return res.status(400).json({ message: 'El cliente tiene citas asociadas. Por favor, cambiala a cancelada o eliminala' });
+        }
+
+        // Cambiar el estado
+        usuario.estado = !usuario.estado;
+        await usuario.save();
+
+        res.status(204).json(usuario);
     } catch (error) {
-        console.log(error)
-        return res.status(500).json({message: error.message})
+        console.log(error);
+        return res.status(500).json({ message: error.message });
     }
-}
+};
+
 

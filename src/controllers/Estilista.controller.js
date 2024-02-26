@@ -1,5 +1,6 @@
 
 import Estilista from'../models/Estilista.js'
+import Cita from '../models/Cita.js'
 import { Role } from '../models/Role.js' 
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
@@ -169,18 +170,30 @@ export const eliminarEstilista=async(req,res)=>{
     }
 }
 
-export const actualizarEstado=async(req,res)=>{
+export const actualizarEstado = async (req, res) => {
     try {
         const id = req.params.id;
-        const actualizadoEstado = await Estilista.findById(id)
-        actualizadoEstado.estado=!actualizadoEstado.estado;
-        await actualizadoEstado.save()
-        res.status(204).json(actualizadoEstado);
+        const estilista = await Estilista.findById(id);
+
+        const citasAsociadas = await Cita.find({
+            estilista: id,
+            estado: { $in: ['confirmada', 'pendiente'] }
+        });
+
+        if (citasAsociadas.length > 0) {
+            return res.status(400).json({ message: 'El estilista tiene citas asociadas. Por favor, cambiala a cancelada o eliminala' });
+        }
+
+        // Cambiar el estado
+        estilista.estado = !estilista.estado;
+        await estilista.save();
+
+        res.status(204).json(estilista);
     } catch (error) {
-        console.log(error)
-        return res.status(500).json({message: error.message})
+        console.log(error);
+        return res.status(500).json({ message: error.message });
     }
-}
+};
 
 
 

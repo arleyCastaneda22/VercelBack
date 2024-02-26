@@ -1,5 +1,6 @@
 import Servicio from '../models/Servicio.js'
 import Estilista from '../models/Estilista.js'
+import Cita from '../models/Cita.js'
 import fs from 'fs';
 
 
@@ -26,34 +27,60 @@ export const listarUnServicio=async(req,res)=>{
 }
 
 //Crear servicio
-export const createServicio = async(req,res)=>{
+export const createServicio = async (req, res) => {
     try {
-   
-        const servicio= Servicio(req.body)     
-        const servicioSave= await servicio.save()
-        return res.status(201).json(servicioSave)
-        
+        const { nombre_servicio, duracion, precio, estilista } = req.body;
+
+        // Verifica si ya existe un servicio con el nombre_servicio proporcionado
+        const servicioExistente = await Servicio.findOne({ nombre_servicio: nombre_servicio });
+
+        if (servicioExistente) {
+            return res.status(400).json({ error: 'El nombre del servicio ya existe' });
+        }
+
+        const nuevoServicio = new Servicio({
+            nombre_servicio: nombre_servicio,
+            duracion: duracion,
+            precio: precio,
+            estilista: estilista
+        });
+
+     
+        const servicioGuardado = await nuevoServicio.save();
+
+        return res.status(201).json(servicioGuardado);
     } catch (error) {
-        console.log(error)
-         return res.status(500).json({mesage:error.mesage})
-        
+        console.error(error);
+        return res.status(500).json({ message: error.message });
     }
-}
+};
 
 
 
 //Actualizar servicio
-export const editarServicio=async(req,res)=>{
+export const editarServicio = async (req, res) => {
     try {
-        const id=req.params.id;
-        const actualizadoServicio= await Servicio.findByIdAndUpdate(id, req.body);
-        res.status(204).json(actualizadoServicio);
-        
+        const id = req.params.id;
+
+        const servicioExistente = await Servicio.findOne({ nombre_servicio: req.body.nombre_servicio });
+
+        if (servicioExistente && servicioExistente._id != id) {
+            return res.status(400).json({ error: 'El nombre del servicio ya existe' });
+        }
+
+        // Realiza la actualización del servicio
+        const actualizadoServicio = await Servicio.findByIdAndUpdate(id, req.body, { new: true });
+
+        if (!actualizadoServicio) {
+            return res.status(404).json({ error: 'Servicio no encontrado' });
+        }
+
+        return res.status(200).json(actualizadoServicio);
     } catch (error) {
-        console.log(error)
-        return res.status(500).json({message: error.message})
+        console.error(error);
+        return res.status(500).json({ message: error.message });
     }
-}
+};
 //Eliminar servicio
 export const eliminarServicio = async (req, res) => {
     try {
@@ -70,18 +97,30 @@ export const eliminarServicio = async (req, res) => {
         return res.status(500).json({ message: error.message })
     }
 }
-export const actualizarEstado=async(req,res)=>{
+export const actualizarEstado = async (req, res) => {
     try {
         const id = req.params.id;
-        const actualizadoEstado = await Servicio.findById(id)
-        actualizadoEstado.estado=!actualizadoEstado.estado;
-        await actualizadoEstado.save()
-        res.status(204).json(actualizadoEstado);
+        const servicio = await Servicio.findById(id);
+
+        const citasAsociadas = await Cita.find({
+            servicio: id,
+            estado: { $in: ['confirmada', 'pendiente'] }
+        });
+
+        if (citasAsociadas.length > 0) {
+            return res.status(400).json({ message: 'El servicio tiene citas asociadas. Por favor, cambiala a cancelada o eliminala' });
+        }
+
+        // Cambiar el estado
+        servicio.estado = !servicio.estado;
+        await servicio.save();
+
+        res.status(204).json(servicio);
     } catch (error) {
-        console.log(error)
-        return res.status(500).json({message: error.message})
+        console.log(error);
+        return res.status(500).json({ message: error.message });
     }
-}
+};
 
 export const estilistaPorServicio =async(req, res)=>{
     try {
