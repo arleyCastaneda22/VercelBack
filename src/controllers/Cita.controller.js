@@ -278,6 +278,11 @@ export const editarCita = async (req, res) => {
     fechaCitaNormalizada.setMilliseconds(0);
     horaCitaNormalizada.setMilliseconds(0);
 
+    //subirle un dia para solucionar el error de restarle un dia en el front
+    const fechaCalendario = new Date(fechaCita)
+
+    fechaCalendario.setDate(fechaCitaNormalizada.getDate() + 1);
+
     // Obtén la duración del servicio desde la base de datos (puedes necesitar ajustar esto según tu modelo)
     const duracionServicio = await Servicio.findById(servicio).select('duracion').exec();
 
@@ -479,7 +484,7 @@ export const editarCita = async (req, res) => {
         cliente: citaActualizada.cliente,
         servicio: citaActualizada.servicio,
         estilista: citaActualizada.estilista,
-        fechaCita: citaActualizada.fechaCita,
+        fechaCita: fechaCalendario,
         horaCita: citaActualizada.horaCita,
         horaFinCita: citaActualizada.horaFinCita,
       },
