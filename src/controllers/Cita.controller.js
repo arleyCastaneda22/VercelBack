@@ -208,6 +208,25 @@ export const createCita = async (req, res) => {
       return res.status(400).json({ error: 'Ya existe una cita para el estilista en el mismo rango de horas.' });
     }
 
+        // Obtener todas las citas del cliente en el día dado
+    const citasClienteEnElDia = await Cita.find({
+      cliente,
+      fechaCita: fechaCitaNormalizada,
+    }).exec();
+
+    // Verificar si hay alguna cita del cliente en el mismo rango de horas
+    const conflictoCitasCliente = citasClienteEnElDia.some(cita => {
+      return (
+        (horaCitaNormalizada >= cita.horaCita && horaCitaNormalizada < cita.horaFinCita) ||
+        (horaFinCitaNormalizada > cita.horaCita && horaFinCitaNormalizada <= cita.horaFinCita) ||
+        (horaCitaNormalizada <= cita.horaCita && horaFinCitaNormalizada >= cita.horaFinCita)
+      );
+    });
+
+    if (conflictoCitasCliente) {
+      return res.status(400).json({ error: 'El cliente ya tiene una cita en el mismo rango de horas.' });
+    }
+
 
     // Crear y guardar la nueva cita
     const cita = new Cita({
@@ -234,8 +253,13 @@ export const createCita = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error al procesar la solicitud' });
+    // console.error(error);
+    if (error.code === 11000) {
+      // Manejar el error de clave duplicada
+      return res.status(400).json({ error: 'Ya existe una cita con estos detalles.' });
+    }else{
+      res.status(500).json({ error: 'Error al procesar la solicitud' });
+    }
   }
 };
 
