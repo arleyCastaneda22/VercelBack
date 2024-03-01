@@ -27,8 +27,8 @@ const citaSchema = new Schema({
     },
     estado: {
         type: String,
-        enum: ['confirmada', 'finalizada', 'pendiente', 'cancelada'],
-        default: 'pendiente',
+        enum: ['confirmada', 'finalizada', 'pendiente' ,'cancelada'],
+        default: 'confirmada',
     },
     turno: {
         type: Schema.Types.ObjectId,

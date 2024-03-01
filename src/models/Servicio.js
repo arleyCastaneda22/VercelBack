@@ -3,7 +3,8 @@ import { Schema, model } from "mongoose";
 const servicioSchema=new Schema({
     nombre_servicio:{
         type:String,
-        require:true
+        lowerCase:true,
+        require:true,
     },
     duracion:{
         type:Number,
@@ -27,4 +28,8 @@ const servicioSchema=new Schema({
     versionKey:false
 })
 
+servicioSchema.pre('save', function (next) {
+    this.nombre_servicio = this.nombre_servicio.toLowerCase();
+    next();
+});
 export default model('Servicio', servicioSchema)
