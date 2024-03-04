@@ -4,11 +4,7 @@ import moment from 'moment';
 export const serviciosUtilizados = async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
-
-        // Validar que se proporcionen las fechas
-        if (!startDate || !endDate) {
-            return res.status(400).json({ error: 'Se requieren fechas de inicio y fin.' });
-        }
+ 
         const serviciosUtilizados = await Cita.aggregate([
             {
                 $match: {
@@ -50,10 +46,7 @@ export const citasPorDia = async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
 
-        // Verificar que las fechas de inicio y fin estén presentes y sean válidas
-        if (!startDate || !endDate || isNaN(new Date(startDate).getTime()) || isNaN(new Date(endDate).getTime())) {
-            return res.status(400).json({ error: "Las fechas de inicio y fin son inválidas o no fueron proporcionadas." });
-        }
+
 
         // Ajustar la fecha de fin para incluir todo el día
         const startMoment = moment.utc(startDate);
