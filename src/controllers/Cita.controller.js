@@ -72,7 +72,8 @@ export const createCita = async (req, res) => {
     console.log('Inicio del turno TARDE:', inicioTToday.toLocaleString());
     console.log('Fin del Turno TARDE:', finTToday.toLocaleString());
 
-    console.log('Fecha y hora de inicio:', horaCitaNormalizada.toLocaleString());
+    console.log('Fecha y hora de inicio(hora):', horaCitaNormalizada.toLocaleString());
+    console.log('Fecha y hora de inicio(fecha):', fechaCitaNormalizada.toLocaleString());
     console.log('Fecha y hora de finalizacion:', horaFinCitaNormalizada.toLocaleString());
     console.log('Duracion del servicio:', duracionServicio.duracion.toLocaleString());
 
@@ -97,31 +98,20 @@ export const createCita = async (req, res) => {
     // Verificar si ya existe una cita para el estilista en el mismo rango de horas
     const existingCitaSameRange = await Cita.findOne({
       estilista,
+      cliente,
       fechaCita: fechaCitaNormalizada,
       $or: [
         {
           $and: [
-            { horaCita: { $lte: horaCitaNormalizada } },
-            { horaFinCita: { $gt: horaCitaNormalizada } },
-          ],
-        },
-        {
-          $and: [
             { horaCita: { $lt: horaFinCitaNormalizada } },
-            { horaFinCita: { $gte: horaFinCitaNormalizada } },
-          ],
-        },
-        {
-          $and: [
-            { horaCita: { $gte: horaCitaNormalizada } },
-            { horaFinCita: { $lte: horaFinCitaNormalizada } },
+            { horaFinCita: { $gt: horaCitaNormalizada } },
           ],
         },
       ],
     });
-
+    
     if (existingCitaSameRange) {
-      return res.status(400).json({ error: 'Ya existe una cita para el estilista en el mismo rango de horas.' });
+      return res.status(400).json({ error: 'Ya existe una cita para el estilista y cliente en el mismo rango de horas.' });
     }
 
 
@@ -208,24 +198,25 @@ export const createCita = async (req, res) => {
       return res.status(400).json({ error: 'Ya existe una cita para el estilista en el mismo rango de horas.' });
     }
 
-        // Obtener todas las citas del cliente en el día dado
-    const citasClienteEnElDia = await Cita.find({
-      cliente,
-      fechaCita: fechaCitaNormalizada,
-    }).exec();
+  // Obtener todas las citas del cliente en el día dado y verificar conflictos
+  const citasClienteEnElDia = await Cita.find({
+    cliente,
+    fechaCita: fechaCitaNormalizada,
+  }).exec();
 
-    // Verificar si hay alguna cita del cliente en el mismo rango de horas
-    const conflictoCitasCliente = citasClienteEnElDia.some(cita => {
-      return (
-        (horaCitaNormalizada >= cita.horaCita && horaCitaNormalizada < cita.horaFinCita) ||
-        (horaFinCitaNormalizada > cita.horaCita && horaFinCitaNormalizada <= cita.horaFinCita) ||
-        (horaCitaNormalizada <= cita.horaCita && horaFinCitaNormalizada >= cita.horaFinCita)
-      );
-    });
+  const conflictoCitasCliente = citasClienteEnElDia.some(cita => {
+    return (
+      (horaCitaNormalizada >= cita.horaCita && horaCitaNormalizada < cita.horaFinCita) ||
+      (horaFinCitaNormalizada > cita.horaCita && horaFinCitaNormalizada <= cita.horaFinCita) ||
+      (horaCitaNormalizada <= cita.horaCita && horaFinCitaNormalizada >= cita.horaFinCita)
+    );
+  });
 
-    if (conflictoCitasCliente) {
-      return res.status(400).json({ error: 'El cliente ya tiene una cita en el mismo rango de horas.' });
-    }
+  if (conflictoCitasCliente) {
+    return res.status(400).json({ error: 'El cliente ya tiene una cita en el mismo rango de horas.' });
+  }
+
+    
 
 
     // Crear y guardar la nueva cita
@@ -412,8 +403,19 @@ export const editarCita = async (req, res) => {
       return res.status(400).json({ error: 'Ya existe una cita para el estilista en el mismo rango de horas.' });
     }
 
+    const existingCita = await Cita.findOne({
+      estilista,
+      fechaCita: fechaCitaNormalizada,
+      horaCita: horaCitaNormalizada,
+      servicio,
+    });
+    
+    if (existingCita) {
+      return res.status(400).json({ error: 'Ya existe una cita con estos detalles.' });
+    }
 
-    const existingCita = await Cita.aggregate([
+
+    const existingCitaRange = await Cita.aggregate([
       {
         $match: {
           estilista,
@@ -492,7 +494,7 @@ export const editarCita = async (req, res) => {
       },
     ]);
 
-    if (existingCita.length > 0) {
+    if (existingCitaRange.length > 0) {
       return res.status(400).json({ error: 'Ya existe una cita para el estilista en el mismo rango de horas.' });
     }
 
@@ -510,8 +512,13 @@ export const editarCita = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error al procesar la solicitud' });
+    // console.error(error);
+    if (error.code === 11000) {
+      // Manejar el error de clave duplicada
+      return res.status(400).json({ error: 'Ya existe una cita con estos detalles.' });
+    }else{
+      res.status(500).json({ error: 'Error al procesar la solicitud' });
+    }
   }
 };
 
