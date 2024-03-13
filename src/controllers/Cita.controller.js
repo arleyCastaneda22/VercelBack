@@ -11,15 +11,14 @@ export const createCita = async (req, res) => {
   try {
     const { cliente, servicio, estilista, fechaCita, horaCita } = req.body;
 
-
-
+    
     const fechaCitaNormalizada = new Date(fechaCita);
     const horaCitaNormalizada = new Date(horaCita);
     const now = new Date(); // Obtener la fecha y hora actual
-
+    
     fechaCitaNormalizada.setMilliseconds(0);
     horaCitaNormalizada.setMilliseconds(0);
-
+    
     // Obtén la duración del servicio desde la base de datos (puedes necesitar ajustar esto según tu modelo)
     const duracionServicio = await Servicio.findById(servicio).select('duracion').exec();
 
@@ -27,11 +26,12 @@ export const createCita = async (req, res) => {
     const fechaCalendario = new Date(fechaCita)
 
     fechaCalendario.setDate(fechaCitaNormalizada.getDate() + 1);
-
+    
     // const duracionCita = 60 * 60 * 1000; // Duración en milisegundos (1 hora)
     const duracionCita = duracionServicio.duracion * 60 * 1000;
     const horaFinCitaNormalizada = new Date(horaCitaNormalizada.getTime() + duracionCita);
-
+    const horaFinCitaNormalizadaCliente = new Date(fechaCalendario.getTime() + duracionCita);
+    
 
 
     // Ajustar las fechas a la precisión de minutos
@@ -67,6 +67,8 @@ export const createCita = async (req, res) => {
     const finTToday = new Date(now);
     finTToday.setHours(finT.getHours(), finT.getMinutes(), 0, 0);
 
+    console.log('fecha que trae el formulario:', fechaCita.toLocaleString());
+    console.log('hora que trae el formulario:', horaCita.toLocaleString());
     console.log('Inicio del turno MAÑANA:', inicioMToday.toLocaleString());
     console.log('Fin del Turno MAÑANA:', finMToday.toLocaleString());
     console.log('Inicio del turno TARDE:', inicioTToday.toLocaleString());
@@ -75,6 +77,8 @@ export const createCita = async (req, res) => {
     console.log('Fecha y hora de inicio(hora):', horaCitaNormalizada.toLocaleString());
     console.log('Fecha y hora de inicio(fecha):', fechaCitaNormalizada.toLocaleString());
     console.log('Fecha y hora de finalizacion:', horaFinCitaNormalizada.toLocaleString());
+    console.log('Fecha y hora(calenadrio):', fechaCalendario.toLocaleString());
+    console.log('Fecha y hora fin cita(calenadrio):', horaFinCitaNormalizadaCliente.toLocaleString());
     console.log('Duracion del servicio:', duracionServicio.duracion.toLocaleString());
 
     console.log(horaCitaNormalizada >= inicioM && horaFinCitaNormalizada <= finM)
@@ -85,6 +89,17 @@ export const createCita = async (req, res) => {
     finM.setSeconds(0, 0);
     inicioT.setSeconds(0, 0);
     finT.setSeconds(0, 0);
+
+// Verificar si el cliente ya tiene una cita en la misma fecha y hora
+  // const existingCitaCliente = await Cita.findOne({
+  //   cliente,
+  //   fechaCita: fechaCalendario,
+  //   horaCita: horaFinCitaNormalizadaCliente
+  // });
+
+  // if (existingCitaCliente) {
+  //   return res.status(400).json({ error: 'El cliente ya tiene una cita en este rango de horas.' });
+  // }
 
 
 
@@ -107,12 +122,25 @@ export const createCita = async (req, res) => {
             { horaFinCita: { $gt: horaCitaNormalizada } },
           ],
         },
+        {
+          $and: [
+            { horaCita: { $gte: horaCitaNormalizada } },
+            { horaCita: { $lt: horaFinCitaNormalizada } },
+          ],
+        },
+        {
+          $and: [
+            { horaFinCita: { $gt: horaCitaNormalizada } },
+            { horaFinCita: { $lte: horaFinCitaNormalizada } },
+          ],
+        },
       ],
     });
     
     if (existingCitaSameRange) {
       return res.status(400).json({ error: 'Ya existe una cita para el estilista y cliente en el mismo rango de horas.' });
     }
+    
 
 
     const existingCita = await Cita.aggregate([
@@ -198,23 +226,7 @@ export const createCita = async (req, res) => {
       return res.status(400).json({ error: 'Ya existe una cita para el estilista en el mismo rango de horas.' });
     }
 
-  // Obtener todas las citas del cliente en el día dado y verificar conflictos
-  const citasClienteEnElDia = await Cita.find({
-    cliente,
-    fechaCita: fechaCitaNormalizada,
-  }).exec();
 
-  const conflictoCitasCliente = citasClienteEnElDia.some(cita => {
-    return (
-      (horaCitaNormalizada >= cita.horaCita && horaCitaNormalizada < cita.horaFinCita) ||
-      (horaFinCitaNormalizada > cita.horaCita && horaFinCitaNormalizada <= cita.horaFinCita) ||
-      (horaCitaNormalizada <= cita.horaCita && horaFinCitaNormalizada >= cita.horaFinCita)
-    );
-  });
-
-  if (conflictoCitasCliente) {
-    return res.status(400).json({ error: 'El cliente ya tiene una cita en el mismo rango de horas.' });
-  }
 
     
 
