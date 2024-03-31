@@ -343,6 +343,10 @@ export const editarCita = async (req, res) => {
 
 
     //citas futuras    
+    if (fechaCitaNormalizada < now) {
+      return res.status(400).json({ error: 'La fecha de la cita debe ser en el futuro.' });
+    }
+
 
     if (
       !(horaCitaNormalizada >= inicioMToday && horaFinCitaNormalizada <= finMToday) &&
