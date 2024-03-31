@@ -215,7 +215,7 @@ export const recuperarContraseña = async (req, res) => {
             html: htmlMessage, // html body
         });
 
-        return res.status(200).json({ ok: true, link , linkDos });
+        return res.status(200).json({ ok: true, link});
 
     } catch (error) {
         console.log(error.message);
