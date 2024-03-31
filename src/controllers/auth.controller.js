@@ -176,7 +176,7 @@ export const recuperarContraseña = async (req, res) => {
             <p>Recuerda que tu seguridad es nuestra prioridad. Nunca compartas tu contraseña con nadie y elige contraseñas fuertes y únicas.</p>
             <p>Si necesitas ayuda o tienes alguna pregunta, no dudes en contactarnos.</p>
             <p>Gracias por confiar en nosotros.</p>
-            <p>Saludos,<br/>Tu Empresa</p>
+            <p>Saludos,<br/>El equipo del Salón de Cielo spa</p>
           `;
     
             await transporter.sendMail({
@@ -204,7 +204,7 @@ export const recuperarContraseña = async (req, res) => {
         <p>Recuerda que tu seguridad es nuestra prioridad. Nunca compartas tu contraseña con nadie y elige contraseñas fuertes y únicas.</p>
         <p>Si necesitas ayuda o tienes alguna pregunta, no dudes en contactarnos.</p>
         <p>Gracias por confiar en nosotros.</p>
-        <p>Saludos,<br/>Tu Empresa</p>
+        <p>Saludos,<br/>El equipo del Salón de Cielo spa</p>
       `;
 
         await transporter.sendMail({
