@@ -193,7 +193,6 @@ export const recuperarContraseña = async (req, res) => {
         // Generar token y enviar correo para el usuario
         const token = jwt.sign({ email: user.email, id: user._id }, 'secreto', { expiresIn: '5m' });
         const link = `http://localhost:4200/reset-password/${user._id}/${token}`;
- 
         const htmlMessage = `
         <p>¡Hola ${user.nombre}!</p>
         <p>Hemos recibido una solicitud para restablecer tu contraseña. Para completar este proceso, sigue estos sencillos pasos:</p>
@@ -216,7 +215,7 @@ export const recuperarContraseña = async (req, res) => {
             html: htmlMessage, // html body
         });
 
-        return res.status(200).json({ ok: true, link });
+        return res.status(200).json({ ok: true, link , linkDos });
 
     } catch (error) {
         console.log(error.message);
